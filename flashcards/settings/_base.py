@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'flashcards.apps.core.middleware.ThreadLocalMiddleware',
 ]
 
 ROOT_URLCONF = 'flashcards.urls'
