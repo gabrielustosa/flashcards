@@ -1,0 +1,19 @@
+{% load i18n %}
+
+<header>
+    <div class="flex justify-between p-5 items-center">
+        <div class="text-4xl font-semibold text-sky-600 dark:text-white">
+            Flashcards
+        </div>
+        <div class="flex space-x-5">
+            {% if user.is_anonymous %}
+                <a class="p-2 px-3 font-lg bg-sky-700 text-gray-300 rounded-lg font-bold">
+                    {% trans 'Entrar' %}
+                </a>
+                <a class="p-2 px-3 font-lg bg-yellow-400 text-gray-700 rounded-lg font-bold">
+                    {% trans 'Registrar-se' %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>

@@ -36,7 +36,7 @@ class UrlBase(models.Model):
         abstract = True
 
 
-class CreationModificationDateBase(models.Model):
+class TimeStampedBase(models.Model):
     created = models.DateTimeField(
         _("Creation Date and Time"),
         auto_now_add=True,

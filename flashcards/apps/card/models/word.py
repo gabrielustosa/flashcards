@@ -46,7 +46,7 @@ DIFERENT_OPTIONS = {
 
 class Word(UrlBase):
     word = models.CharField(_('Word'), max_length=100)
-    language = models.CharField(_('Language'), max_length=2)
+    language = models.CharField(_('Language'), max_length=5)
     audio_phonetic = models.FileField(_('Audio'), upload_to='phonetics/', null=True)
 
     def save(self, *args, **kwargs):
@@ -60,15 +60,31 @@ class Word(UrlBase):
 
             super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f'{self.word} - {self.language}'
+
 
 class Meaning(models.Model):
     word = models.ForeignKey(
         Word,
         related_name='meanings',
-        on_ddelete=models.CASCADE
+        on_delete=models.CASCADE
     )
     headword = models.CharField(_('Headword'), max_length=100)
     definitions = models.TextField(_('Definitions'))
 
     def get_definitions(self):
         return [definition for definition in self.definitions.split('|')]
+
+
+class WordTranslated(models.Model):
+    word = models.ForeignKey(
+        Word,
+        related_name='translations',
+        on_delete=models.CASCADE
+    )
+    for_language = models.CharField(_('Language'), max_length=5)
+    meanings = models.TextField(_('Meanings'))
+
+    def get_meanings(self):
+        return [meaning for meaning in self.meanings.split('|')]
