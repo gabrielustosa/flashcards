@@ -7,7 +7,7 @@ from flashcards.apps.core.models import UrlBase, TimeStampedBase, CreatorBase
 from flashcards.apps.deck.models import Deck
 
 
-class Card(UrlBase, TimeStampedBase, CreatorBase):
+class CardWord(UrlBase, TimeStampedBase, CreatorBase):
     language = models.CharField(_('Language'), max_length=5)
     word = models.ForeignKey(
         Word,

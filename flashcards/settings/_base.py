@@ -45,11 +45,14 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload',
+    'crispy_forms',
+    'crispy_tailwind',
 
     # my apps
     'flashcards.apps.core',
     'flashcards.apps.deck',
     'flashcards.apps.card',
+    'flashcards.apps.user',
 ]
 
 MIDDLEWARE = [
@@ -145,6 +148,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Tailwind Config
 
 TAILWIND_APP_NAME = 'theme'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'tailwind'
+
+CRISPY_TEMPLATE_PACK = 'tailwind'
+
+# AUTH
+
+AUTH_USER_MODEL = 'user.User'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 INTERNAL_IPS = [
     "127.0.0.1",
