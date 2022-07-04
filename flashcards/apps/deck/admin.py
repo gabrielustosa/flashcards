@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from flashcards.apps.deck.models import Deck
+
+admin.site.register(Deck)

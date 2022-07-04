@@ -10,5 +10,7 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['decks'] = Deck.objects.all()
+        if self.request.user.is_authenticated:
+            context['my_decks'] = Deck.objects.filter(creator=self.request.user)
 
         return context
