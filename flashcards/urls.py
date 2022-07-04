@@ -16,6 +16,9 @@ urlpatterns = [
     path('login/', views_login.LoginView.as_view(), name='login'),
     path('logout/', views_login.LogoutView.as_view(), name='logout'),
 
+    path('deck/', include('flashcards.apps.deck.urls')),
+    path('card/', include('flashcards.apps.card.urls')),
+
     path('', HomeView.as_view(), name='home')
 ]
 

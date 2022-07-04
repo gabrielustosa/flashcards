@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<div class="flex justify-between text-gray-700 p-5 text-xl">
+    <div onclick="document.getElementById('audio').play()" class="cursor-pointer">
+        <i class="bi bi-volume-up-fill pr-2"></i>
+        {% trans 'Pronúncia' %}
+    </div>
+    <div class="cursor-pointer">
+        <i class="bi bi-trash3-fill pr-2"></i>
+        {% trans 'Apagar' %}
+    </div>
+</div>
+<div class="pt-32 text-center text-3xl font-medium">
+    {{ card.word }}
+</div>
+<audio id="audio" src="{{ card.audio_phonetic.url }}"></audio>

@@ -18,5 +18,11 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
     class Meta:
         ordering = ['id']
 
+    def get_first_card(self):
+        return self.cards.first()
+
+    def get_last_card(self):
+        return self.cards.last()
+
     def __str__(self):
         return self.name

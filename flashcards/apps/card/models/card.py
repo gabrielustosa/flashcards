@@ -22,7 +22,6 @@ class Card(models.Model):
         on_delete=models.CASCADE,
         limit_choices_to={'model__in': (
             'cardword',
-            'cardnormal',
             'cardphrasalverb',
             'cardexpressions')}
     )
@@ -39,10 +38,6 @@ class CardWord(UrlBase, TimeStampedBase, CreatorBase):
         Word,
         on_delete=models.CASCADE
     )
-
-
-class CardNormal(UrlBase, TimeStampedBase, CreatorBase):
-    pass
 
 
 class CardPhrasalVerb(UrlBase, TimeStampedBase, CreatorBase):

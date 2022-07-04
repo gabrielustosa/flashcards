@@ -13,10 +13,12 @@
 {% block content %}
     <div>
         <h1 class="text-3xl text-gray-600 font-medium p-8 dark:text-white">{% trans 'Todos os baralhos' %}</h1>
-        {% include 'includes/deck/card.html' %}
+        {% include 'includes/deck/card_menu.html' %}
     </div>
-    <div>
-        <h1 class="text-3xl text-gray-600 font-medium p-8 dark:text-white">{% trans 'Seus baralhos' %}</h1>
-        {% include 'includes/deck/card.html' with decks=my_decks %}
-    </div>
+    {% if user.is_authenticated %}
+        <div>
+            <h1 class="text-3xl text-gray-600 font-medium p-8 dark:text-white">{% trans 'Seus baralhos' %}</h1>
+            {% include 'includes/deck/card_menu.html' with decks=my_decks %}
+        </div>
+    {% endif %}
 {% endblock %}

@@ -49,7 +49,7 @@ class User(AbstractUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', ]
+    REQUIRED_FIELDS = ['name', 'language']
 
     def get_url_profile(self):
         name_parts = self.name.split(' ')

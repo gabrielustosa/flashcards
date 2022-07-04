@@ -1,0 +1,75 @@
+{% extends '_base.html' %}
+
+{% load i18n %}
+
+{% block meta_tags %}
+
+{% endblock %}
+
+{% block title %}
+    {% trans 'Cartões - ' %} {{ deck.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="p-10 min-h-full">
+        <h1 class="text-3xl font-bold">{{ deck.name }}</h1>
+        <div class="grid grid-cols-4 min-h-max">
+            <div class="pt-12 pl-5">
+                <ul class="text-lg font-semibold text-gray-700 space-y-4">
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                        <i class="bi bi-card-text pr-4"></i>{% trans 'Cartões' %}
+                    </li>
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                        <i class="bi bi-question-octagon-fill pr-4"></i>{% trans 'Questões' %}
+                    </li>
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                        <i class="bi bi-pencil-fill pr-4"></i>{% trans 'Escrever' %}
+                    </li>
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                        <i class="bi bi-info-circle-fill pr-4"></i>{% trans 'Informações' %}
+                    </li>
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                        <i class="bi bi-plus pr-4"></i>{% trans 'Adicionar' %}
+                    </li>
+                </ul>
+            </div>
+            <div class="col-span-3">
+                <div class="flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
+                    <div id="flashcard"
+                         _="on click if #current-side.value == 'back' set #current-side.value to 'front' else set #current-side.value to 'back' then call turnCard()"
+                         class="grow">
+                        {% include 'includes/deck/flashcard.html' %}
+                    </div>
+                    <div class="flex justify-center py-8 text-3xl space-x-40">
+                        <div _="on click if #current-card.value > 1 decrement #current-card.value then call updateCard()"
+                             class="cursor-pointer">
+                            <i class="bi bi-chevron-left"></i>
+                        </div>
+                        <div _="on click if #current-card.value < {{ deck.get_last_card.order }} increment #current-card.value then call updateCard()"
+                             class="cursor-pointer">
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                <input id="current-card" type="hidden" value="1">
+                <input id="current-side" type="hidden" value="front">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        function updateCard() {
+            let current_card = document.querySelector('#current-card').value
+            htmx.ajax('GET', `/card/view/{{ deck.deck_type }}/${current_card}/`, '#flashcard')
+        }
+
+        function turnCard() {
+            let current_card = document.querySelector('#current-card').value
+            let current_side = document.querySelector('#current-side').value
+
+            htmx.ajax('GET', `/card/turn/${current_card}?side=${current_side}`)
+        }
+    </script>
+{% endblock %}

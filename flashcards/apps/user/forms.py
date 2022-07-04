@@ -1,4 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 from .models import User
 
@@ -6,7 +7,7 @@ from .models import User
 class UserCreateForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'name', 'password1', 'password2')
+        fields = ('username', 'name', 'language', 'password1', 'password2')
         labels = {'username': 'E-mail'}
 
     def save(self, commit=True):
@@ -19,6 +20,8 @@ class UserCreateForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super(UserCreateForm, self).__init__(*args, **kwargs)
+
+        self.fields['language'].label = _('Select your language')
 
         for fieldname in ['username', 'password1', 'password2']:
             self.fields[fieldname].help_text = None

@@ -2,6 +2,7 @@ import tempfile
 
 from django.core.files import File
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from gtts import gTTS
@@ -9,31 +10,31 @@ from gtts import gTTS
 from flashcards.apps.core.models import UrlBase
 
 WORD_LANGUAGES = [
-    ('ar', 'Arabic'),
-    ('zh', 'Simplified Chinese'),
-    ('zh-tw', 'Traditional Chinese'),
-    ('cs', 'Czech'),
-    ('da', 'Danish'),
-    ('nl', 'Dutc'),
-    ('en', 'English'),
-    ('fr', 'French'),
-    ('de', 'German'),
-    ('el', 'Greek'),
-    ('iw', 'Hebrew'),
-    ('hi', 'Hindi'),
-    ('it', 'Italian'),
-    ('ja', 'Japanese'),
-    ('ko', 'Korean'),
-    ('la', 'Latin'),
-    ('no', 'Norwegian'),
-    ('pl', 'Polish'),
-    ('pt', 'Portuguese'),
-    ('pt-br', 'Portuguese Brazilian'),
-    ('ru', 'Russian'),
-    ('es', 'Spanish'),
-    ('sv', 'Swedish'),
-    ('th', 'Thai'),
-    ('tr', 'Turkish')
+    ('ar', _('Arabic')),
+    ('zh', _('Simplified Chinese')),
+    ('zh-tw', _('Traditional Chinese')),
+    ('cs', _('Czech')),
+    ('da', _('Danish')),
+    ('nl', _('Dutch')),
+    ('en', _('English')),
+    ('fr', _('French')),
+    ('de', _('German')),
+    ('el', _('Greek')),
+    ('iw', _('Hebrew')),
+    ('hi', _('Hindi')),
+    ('it', _('Italian')),
+    ('ja', _('Japanese')),
+    ('ko', _('Korean')),
+    ('la', _('Latin')),
+    ('no', _('Norwegian')),
+    ('pl', _('Polish')),
+    ('pt', _('Portuguese')),
+    ('pt-br', _('Portuguese Brazilian')),
+    ('ru', _('Russian')),
+    ('es', _('Spanish')),
+    ('sv', _('Swedish')),
+    ('th', _('Thai')),
+    ('tr', _('Turkish'))
 ]
 
 DIFERENT_OPTIONS = {
@@ -53,9 +54,9 @@ class Word(UrlBase):
         if not self.audio_phonetic:
             audio = gTTS(text=self.word, lang=self.language, slow=True)
 
-            with tempfile.TemporaryFile(mode='w') as file:
+            with tempfile.TemporaryFile(mode='wb+') as file:
                 audio.write_to_fp(file)
-                file_name = f'{self.word}.mp3'
+                file_name = f'{slugify(self.word)}.mp3'
                 self.audio_phonetic.save(file_name, File(file=file))
 
             super().save(*args, **kwargs)
