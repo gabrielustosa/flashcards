@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
+from flashcards.apps.card.models import Card
+from flashcards.apps.core.fields import OrderField
 from flashcards.apps.core.models import UrlBase, TimeStampedBase, CreatorBase
 
 DECK_TYPES = (
@@ -14,6 +17,12 @@ DECK_TYPES = (
 class Deck(UrlBase, TimeStampedBase, CreatorBase):
     name = models.CharField(_('Name'), max_length=100)
     deck_type = models.CharField(_('Deck type'), max_length=11, choices=DECK_TYPES)
+    language = models.CharField(_('Language'), max_length=5, choices=settings.WORD_LANGUAGES)
+    cards = models.ManyToManyField(
+        Card,
+        through='CardRelation',
+        blank=True,
+    )
 
     class Meta:
         ordering = ['id']
@@ -21,8 +30,14 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
     def get_first_card(self):
         return self.cards.first()
 
-    def get_last_card(self):
-        return self.cards.last()
+    def get_last_card_relation(self):
+        return CardRelation.objects.filter(deck=self).order_by('order').last()
 
     def __str__(self):
         return self.name
+
+
+class CardRelation(models.Model):
+    deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE)
+    order = OrderField(for_fields=['deck'])

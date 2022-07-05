@@ -15,6 +15,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from utils.environment import parse_comma_sep_str_to_list, get_env_variable
 
+from django.utils.translation import gettext_lazy as _
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -163,3 +165,40 @@ LOGOUT_REDIRECT_URL = '/'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# WORD LANGUAGES TO MODELS
+
+WORD_LANGUAGES = [
+    ('ar', _('Arabic')),
+    ('zh', _('Simplified Chinese')),
+    ('zh-tw', _('Traditional Chinese')),
+    ('cs', _('Czech')),
+    ('da', _('Danish')),
+    ('nl', _('Dutch')),
+    ('en', _('English')),
+    ('fr', _('French')),
+    ('de', _('German')),
+    ('el', _('Greek')),
+    ('iw', _('Hebrew')),
+    ('hi', _('Hindi')),
+    ('it', _('Italian')),
+    ('ja', _('Japanese')),
+    ('ko', _('Korean')),
+    ('la', _('Latin')),
+    ('no', _('Norwegian')),
+    ('pl', _('Polish')),
+    ('pt', _('Portuguese')),
+    ('pt-br', _('Portuguese Brazilian')),
+    ('ru', _('Russian')),
+    ('es', _('Spanish')),
+    ('sv', _('Swedish')),
+    ('th', _('Thai')),
+    ('tr', _('Turkish'))
+]
+
+DIFERENT_OPTIONS = {
+    'tw': 'zh-tw',
+    'dk': 'da',
+    'he': 'iw',
+    'br': 'pt-br'
+}

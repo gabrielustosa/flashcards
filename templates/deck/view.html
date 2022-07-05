@@ -1,6 +1,6 @@
 {% extends '_base.html' %}
 
-{% load i18n %}
+{% load i18n static %}
 
 {% block meta_tags %}
 
@@ -34,18 +34,21 @@
                 </ul>
             </div>
             <div class="col-span-3">
-                <div class="flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
-                    <div id="flashcard"
-                         _="on click if #current-side.value == 'back' set #current-side.value to 'front' else set #current-side.value to 'back' then call turnCard()"
-                         class="grow">
-                        {% include 'includes/deck/flashcard.html' %}
+                <div class="relative flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
+                    <div class="absolute right-0 text-gray-700 p-5 text-xl cursor-pointer"
+                         data-modal-toggle="delete-flashcard">
+                        <i class="bi bi-trash3-fill pr-2"></i>
+                        {% trans 'Apagar' %}
+                    </div>
+                    <div id="flashcard" class="flex flex-col grow">
+                        {% include 'includes/card/flashcard/front.html' %}
                     </div>
                     <div class="flex justify-center py-8 text-3xl space-x-40">
                         <div _="on click if #current-card.value > 1 decrement #current-card.value then call updateCard()"
                              class="cursor-pointer">
                             <i class="bi bi-chevron-left"></i>
                         </div>
-                        <div _="on click if #current-card.value < {{ deck.get_last_card.order }} increment #current-card.value then call updateCard()"
+                        <div _="on click if #current-card.value < {{ deck.get_last_card_relation.order }} increment #current-card.value then call updateCard()"
                              class="cursor-pointer">
                             <i class="bi bi-chevron-right"></i>
                         </div>
@@ -56,20 +59,67 @@
             </div>
         </div>
     </div>
+    <div id="delete-flashcard" tabindex="-1" aria-hidden="true"
+         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full">
+        <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <div class="flex justify-between items-start p-4 rounded-t border-b dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Confirmação
+                    </h3>
+                    <button type="button"
+                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                            data-modal-toggle="delete-flashcard">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="text-lg">
+                        Você tem certeza que deseja excluir esse cartão?
+                    </div>
+                    <div class="flex space-x-6">
+                        <button data-modal-toggle="delete-flashcard" type="button"
+                                class="p-2 bg-yellow-400 rounded-lg text-white">
+                            Cancelar
+                        </button>
+                        <button data-modal-toggle="delete-flashcard" type="button"
+                                _="on click call deleteCard()"
+                                class="p-2 bg-red-700 rounded-lg text-white">
+                            Confirmar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascript %}
     <script>
         function updateCard() {
             let current_card = document.querySelector('#current-card').value
-            htmx.ajax('GET', `/card/view/{{ deck.deck_type }}/${current_card}/`, '#flashcard')
+
+            htmx.ajax('GET', `/card/view/{{ deck.deck_type }}/${current_card}/{{ deck.id }}`, '#flashcard')
         }
 
         function turnCard() {
             let current_card = document.querySelector('#current-card').value
             let current_side = document.querySelector('#current-side').value
 
-            htmx.ajax('GET', `/card/turn/${current_card}?side=${current_side}`)
+            htmx.ajax('GET', `/card/turn/${current_card}?side=${current_side}`, '#flashcard')
+        }
+
+        function deleteCard() {
+            let current_card = document.querySelector('#current-card').value
+
+            htmx.ajax('GET', `/card/remove/${current_card}/{{ deck.id }}`, '#flashcard')
+
+            if (current_card > 1)
+                document.querySelector('#current-card').value = current_card - 1
         }
     </script>
 {% endblock %}

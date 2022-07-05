@@ -17,6 +17,9 @@ class DeckView(TemplateView):
 
         cnt_type = self.kwargs.get('cnt_type')
         if cnt_type == 'word':
-            context['card'] = deck.get_first_card().item.word
+            card = None
+            if deck.get_first_card():
+                card = deck.get_first_card().item.word
+            context['card'] = card
 
         return context

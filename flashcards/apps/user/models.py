@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+from django.conf import settings
 
-from flashcards.apps.card.models import WORD_LANGUAGES
 
 
 class UserManager(BaseUserManager):
@@ -43,7 +43,7 @@ class User(AbstractUser):
     is_staff = models.BooleanField(_('Staff'), default=False)
     language = models.CharField(
         _('Language'),
-        choices=WORD_LANGUAGES,
+        choices=settings.WORD_LANGUAGES,
         max_length=5
     )
     objects = UserManager()
