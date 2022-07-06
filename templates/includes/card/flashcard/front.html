@@ -10,4 +10,15 @@
      _="on click if #current-side.value === 'back' set #current-side.value to 'front' otherwise set #current-side.value to 'back' end get turnCard()">
     {{ card.word }}
 </div>
+<div class="flex justify-center py-8 text-3xl space-x-40">
+    <div _="on click if #current-card.value > 1 decrement #current-card.value then call updateCard()"
+         class="cursor-pointer">
+        <i class="bi bi-chevron-left"></i>
+    </div>
+    <div _="on click if #current-card.value < {{ deck.get_last_order }} increment #current-card.value then call updateCard()"
+         class="cursor-pointer">
+        <i class="bi bi-chevron-right"></i>
+    </div>
+</div>
+
 <audio id="audio" src="{{ card.audio_phonetic.url }}"></audio>

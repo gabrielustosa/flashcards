@@ -1,5 +1,6 @@
 import tempfile
 
+from django.conf import settings
 from django.core.files import File
 from django.db import models
 from django.utils.text import slugify
@@ -30,7 +31,7 @@ class Word(UrlBase):
         return f'{self.word} - {self.language}'
 
 
-class Meaning(models.Model):
+class WordDefinition(models.Model):
     word = models.ForeignKey(
         Word,
         related_name='meanings',
@@ -43,11 +44,11 @@ class Meaning(models.Model):
         return [definition for definition in self.definitions.split('|')]
 
 
-class WordTranslated(models.Model):
+class WordMeaning(models.Model):
     word = models.ForeignKey(
         Word,
         related_name='translations',
         on_delete=models.CASCADE
     )
-    for_language = models.CharField(_('Language'), max_length=5)
+    for_language = models.CharField(_('Language'), choices=settings.WORD_LANGUAGES, max_length=5)
     meaning = models.TextField(_('Meanings'))

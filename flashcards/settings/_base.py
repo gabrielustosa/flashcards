@@ -196,9 +196,3 @@ WORD_LANGUAGES = [
     ('tr', _('Turkish'))
 ]
 
-DIFERENT_OPTIONS = {
-    'tw': 'zh-tw',
-    'dk': 'da',
-    'he': 'iw',
-    'br': 'pt-br'
-}

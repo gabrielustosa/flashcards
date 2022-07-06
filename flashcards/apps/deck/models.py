@@ -28,10 +28,16 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
         ordering = ['id']
 
     def get_first_card(self):
-        return self.cards.first()
+        try:
+            return CardRelation.objects.filter(deck=self).order_by('order').first().card
+        except Exception:
+            pass
 
-    def get_last_card_relation(self):
-        return CardRelation.objects.filter(deck=self).order_by('order').last()
+    def get_last_order(self):
+        try:
+            return CardRelation.objects.filter(deck=self).order_by('order').last().order
+        except Exception:
+            pass
 
     def __str__(self):
         return self.name
