@@ -2,7 +2,7 @@
 
 <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mx-8 w-4/5">
     {% for deck in decks %}
-        <a href="{{ deck.url }}"
+        <a href="{{ deck.get_absolute_url }}"
            class="shadow-xl p-5 hover:border-b-4 hover:border-gray-400 cursor-pointer dark:bg-slate-700 rounded-lg">
             <h1 class="text-lg font-bold text-neutral-700 dark:text-white">{{ deck.name }}</h1>
             <h5 class="py-2 text-sm text-gray-400">

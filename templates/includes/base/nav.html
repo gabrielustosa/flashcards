@@ -2,9 +2,15 @@
 
 <header class="dark:bg-gray-800">
     <div class="flex justify-between p-5 items-center">
-        <a href="/" class="text-4xl font-semibold text-sky-600 dark:text-white cursor-pointer">
-            Flashcards
-        </a>
+        <div class="flex items-center">
+            <a href="/" class="text-4xl font-semibold text-sky-600 dark:text-white cursor-pointer">
+                Flashcards
+            </a>
+            <a href="{% url 'deck:create' %}" class="py-1.5 bg-sky-600 rounded-lg ml-8 text-white px-4">
+                Criar
+                <i class="bi bi-plus-lg"></i>
+            </a>
+        </div>
         <div class="flex space-x-5">
             {% if user.is_anonymous %}
                 <a href="{% url 'login' %}"

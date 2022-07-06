@@ -6,9 +6,9 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from gtts import gTTS
+from flashcards.apps.core.models import UrlBase, TimeStampedBase, CreatorBase
 
-from flashcards.apps.core.models import UrlBase
+from gtts import gTTS
 
 
 class Word(UrlBase):
@@ -34,21 +34,27 @@ class Word(UrlBase):
 class WordDefinition(models.Model):
     word = models.ForeignKey(
         Word,
-        related_name='meanings',
+        related_name='definitions',
         on_delete=models.CASCADE
     )
     headword = models.CharField(_('Headword'), max_length=100)
-    definitions = models.TextField(_('Definitions'))
-
-    def get_definitions(self):
-        return [definition for definition in self.definitions.split('|')]
+    for_language = models.CharField(_('Language'), choices=settings.WORD_LANGUAGES, max_length=5)
+    definition = models.TextField(_('Definition'))
 
 
 class WordMeaning(models.Model):
     word = models.ForeignKey(
         Word,
-        related_name='translations',
+        related_name='meanings',
         on_delete=models.CASCADE
     )
     for_language = models.CharField(_('Language'), choices=settings.WORD_LANGUAGES, max_length=5)
-    meaning = models.TextField(_('Meanings'))
+    meaning = models.TextField(_('Meaning'))
+
+
+class Card(UrlBase, TimeStampedBase, CreatorBase):
+    language = models.CharField(_('Language'), max_length=5)
+    word = models.ForeignKey(
+        Word,
+        on_delete=models.CASCADE
+    )

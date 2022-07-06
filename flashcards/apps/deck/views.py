@@ -1,5 +1,7 @@
-from django.views.generic import TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, CreateView
 
+from flashcards.apps.card.forms import CardForm
 from flashcards.apps.deck.models import Deck
 
 
@@ -15,11 +17,18 @@ class DeckView(TemplateView):
 
         context['deck'] = deck
 
-        cnt_type = self.kwargs.get('cnt_type')
-        if cnt_type == 'word':
-            card = None
-            if deck.get_first_card():
-                card = deck.get_first_card().item.word
-            context['card'] = card
+        card = None
+        if deck.get_first_card():
+            card = deck.get_first_card().word
+        context['card'] = card
+
+        context['add_form'] = CardForm()
 
         return context
+
+
+class DeckCreateView(CreateView):
+    template_name = 'deck/create.html'
+    model = Deck
+    fields = ['name', 'language']
+    success_url = reverse_lazy('home')
