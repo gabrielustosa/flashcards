@@ -76,33 +76,37 @@ def add_card(request, deck_id):
 
     word = request.POST.get('word').capitalize()
 
-    deck_language = deck.language
     user_langauge = request.user.language
 
-    word_query = Word.objects.filter(word=word, language=deck.language)
+    word_query = Word.objects.filter(word=word, for_language=user_langauge)
 
     if word_query.exists():
         word_object = word_query.first()
 
-        card = Card.objects.create(language=deck_language, word=word_object)
+        card = Card.objects.create(word=word_object)
 
         deck.cards.add(card)
     else:
-        word_object = Word.objects.create(word=word, language=deck_language)
-
-        result_definitions = get_lexical_definitions(word, deck_language, user_langauge)
+        result_definitions = get_lexical_definitions(word, user_langauge)
 
         if not result_definitions:
-            return redirect(reverse('deck:view', kwargs={'deck_id': 1}))
+            return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
 
-        result_meanings = get_word_meanigs(word, user_langauge, deck_language)
+        result_meanings, synonyms = get_word_meanigs(word, user_langauge)
+
+        word_object = Word.objects.create(word=word, for_language=user_langauge, synonyms=synonyms)
 
         for result in result_definitions:
             for headword, definitions in result.items():
                 for definition in definitions:
+                    headword_split = headword.split('-')
+                    headword_pos = headword_split[0]
+                    headword_text = headword_split[1]
+
                     WordDefinition.objects.create(
                         word=word_object,
-                        headword=headword,
+                        headword_pos=headword_pos,
+                        headword_text=headword_text,
                         for_language=user_langauge,
                         definition=definition
                     )
@@ -114,8 +118,8 @@ def add_card(request, deck_id):
                 meaning=meaning
             )
 
-        card = Card.objects.create(language=deck_language, word=word_object)
+        card = Card.objects.create(word=word_object)
 
         deck.cards.add(card)
 
-    return redirect(reverse('deck:view', kwargs={'deck_id': 1}))
+    return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))

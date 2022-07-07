@@ -13,22 +13,26 @@ from gtts import gTTS
 
 class Word(UrlBase):
     word = models.CharField(_('Word'), max_length=100)
-    language = models.CharField(_('Language'), max_length=5)
     audio_phonetic = models.FileField(_('Audio'), upload_to='phonetics/', null=True)
+    for_language = models.CharField(_('Language'), max_length=7)
+    synonyms = models.TextField(_('Synonyms'))
 
     def save(self, *args, **kwargs):
         if not self.audio_phonetic:
-            audio = gTTS(text=self.word, lang=self.language, slow=True)
+            audio = gTTS(text=self.word, lang='en', slow=True)
 
             with tempfile.TemporaryFile(mode='wb+') as file:
                 audio.write_to_fp(file)
-                file_name = f'{slugify(self.word)}-{self.language}.mp3'
+                file_name = f'{slugify(self.word)}.mp3'
                 self.audio_phonetic.save(file_name, File(file=file))
 
             super().save(*args, **kwargs)
 
+    def get_synonyms(self):
+        return [synonym for synonym in self.synonyms.split('|')]
+
     def __str__(self):
-        return f'{self.word} - {self.language}'
+        return self.word
 
 
 class WordDefinition(models.Model):
@@ -37,8 +41,9 @@ class WordDefinition(models.Model):
         related_name='definitions',
         on_delete=models.CASCADE
     )
-    headword = models.CharField(_('Headword'), max_length=100)
-    for_language = models.CharField(_('Language'), choices=settings.WORD_LANGUAGES, max_length=5)
+    headword_pos = models.CharField(_('Headword Pos'), max_length=100)
+    headword_text = models.CharField(_('Headword Text'), max_length=100)
+    for_language = models.CharField(_('Language'), max_length=5)
     definition = models.TextField(_('Definition'))
 
 
@@ -48,7 +53,7 @@ class WordMeaning(models.Model):
         related_name='meanings',
         on_delete=models.CASCADE
     )
-    for_language = models.CharField(_('Language'), choices=settings.WORD_LANGUAGES, max_length=5)
+    for_language = models.CharField(_('Language'), max_length=5)
     meaning = models.TextField(_('Meaning'))
 
 

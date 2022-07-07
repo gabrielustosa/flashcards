@@ -1,7 +1,6 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 from flashcards.apps.card.models import Card
 from flashcards.apps.core.fields import OrderField
@@ -10,7 +9,7 @@ from flashcards.apps.core.models import UrlBase, TimeStampedBase, CreatorBase
 
 class Deck(UrlBase, TimeStampedBase, CreatorBase):
     name = models.CharField(_('Name'), max_length=100)
-    language = models.CharField(_('Language'), max_length=5, choices=settings.WORD_LANGUAGES)
+    description = models.TextField(_('Description'))
     cards = models.ManyToManyField(
         Card,
         through='CardRelation',

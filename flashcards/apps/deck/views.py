@@ -30,5 +30,5 @@ class DeckView(TemplateView):
 class DeckCreateView(CreateView):
     template_name = 'deck/create.html'
     model = Deck
-    fields = ['name', 'language']
+    fields = ['name', 'description']
     success_url = reverse_lazy('home')

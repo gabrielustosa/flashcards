@@ -1,25 +1,26 @@
 import requests
 import os
+import uuid
 
-from googletrans import Translator
-
-from utils.language import fix_language_to_lexicala, fix_language_to_google
-
-headers = {
-    "X-RapidAPI-Key": os.environ.get('RAPID_API_KEY'),
+lexicala_headers = {
+    "X-RapidAPI-Key": os.environ.get('LEXICALA_API_KEY'),
     "X-RapidAPI-Host": "lexicala1.p.rapidapi.com"
 }
 
-translator = Translator()
+microsoft_headers = {
+    'Ocp-Apim-Subscription-Key': os.environ.get('MICROSOFT_API_KEY'),
+    'Ocp-Apim-Subscription-Region': 'brazilsouth',
+    'Content-type': 'application/json',
+    'X-ClientTraceId': str(uuid.uuid4())
+}
+
+microsoft_endpoint = 'https://api.cognitive.microsofttranslator.com'
 
 
-def get_lexical_definitions(word, word_language, language):
-    word_language = fix_language_to_lexicala(word_language)
-    language = fix_language_to_google(language)
+def get_lexical_definitions(word, to_language):
+    url = f'https://lexicala1.p.rapidapi.com/search?source=global&language=en&text={word}&analyzed=true'
 
-    url = f'https://lexicala1.p.rapidapi.com/search?source=global&language={word_language}&text={word}&analyzed=true'
-
-    response_json = requests.request('GET', url, headers=headers).json()
+    response_json = requests.request('GET', url, headers=lexicala_headers).json()
 
     if not response_json['results']:
         return None
@@ -32,44 +33,78 @@ def get_lexical_definitions(word, word_language, language):
         for sense in result['senses']:
             sense = sense.get('definition')
             if sense:
-                sense_translated = translator.translate(text=sense, dest=language).text
+                sense_translated = get_text_translated(sense, to_language)
                 result_definitions.append(sense_translated)
 
-        headword = result['headword']['pos']
-        headword_translated = translator.translate(headword, dest=language).text
-        result_dict = {headword_translated: result_definitions}
+            if isinstance(result['headword'], dict):
 
-        definitions.append(result_dict)
+                try:
+                    headword_pos = result['headword']['pos']
+                except KeyError:
+                    headword_pos = 'NOUN'
+
+                headword_text = result['headword']['text']
+
+                headword = headword_pos.upper() + '-' + headword_text
+
+                headword_translated = headword
+                result_dict = {headword_translated: result_definitions}
+
+                definitions.append(result_dict)
 
     return definitions
 
 
-def get_word_meanigs(word, language_to, language):
-    language_to = fix_language_to_google(language_to)
-    language = fix_language_to_google(language)
+def get_text_translated(sentence, to_language):
+    sentence = sentence.strip().lower()
 
-    word_translated = translator.translate(text=word, dest=language_to, src=language)
+    path = '/translate'
+    constructed_url = microsoft_endpoint + path
+
+    params = {
+        'api-version': '3.0',
+        'from': 'en',
+        'to': to_language,
+    }
+
+    request = requests.post(constructed_url, params=params, headers=microsoft_headers, json=[{'text': sentence}])
+
+    response = request.json()
+
+    sentence_translated = response[0]['translations'][0]['text']
+
+    return sentence_translated
+
+
+def get_word_meanigs(word, to_language):
+    word = word.strip().lower()
+
+    path = '/dictionary/lookup'
+
+    constructed_url = microsoft_endpoint + path
+
+    params = {
+        'api-version': '3.0',
+        'from': 'en',
+        'to': to_language,
+    }
+
+    request = requests.post(constructed_url, params=params, headers=microsoft_headers, json=[{'text': word}])
+
+    response = request.json()
 
     meanings = set()
+    similar = set()
 
-    if word_translated.extra_data['possible-translations']:
-        for a in word_translated.extra_data['possible-translations']:
-            for c in a[2]:
-                if c[0]:
-                    meanings.add(c[0].capitalize())
+    for translation in response[0]['translations']:
+        for back_translation in translation['backTranslations']:
+            if back_translation['normalizedText'] != word:
+                similar.add(back_translation['normalizedText'])
+        meanings.add(f'{translation["normalizedTarget"]}')
 
-    if word_translated.extra_data['all-translations']:
-        for translations in word_translated.extra_data['all-translations']:
-            for translation in translations[1]:
-                meanings.add(translation.capitalize())
-
-    return meanings
+    return meanings, '|'.join(similar)
 
 
 if __name__ == '__main__':
-    headers = {
-        "X-RapidAPI-Key": "e2d1cb271bmsh5756db474c5f250p1e8bbbjsn30ed473e7697",
-        "X-RapidAPI-Host": "lexicala1.p.rapidapi.com"
-    }
-    # print(get_lexical_definitions('Teasdat', 'en', 'pt-br'))
-    # print(get_word_meanigs('Train', 'pt-br', 'en'))
+    print(get_lexical_definitions('Think', 'pt-br'))
+    print(get_word_meanigs('Think', 'pt-br'))

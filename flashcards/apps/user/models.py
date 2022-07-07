@@ -4,7 +4,6 @@ from django.db import models
 from django.conf import settings
 
 
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -43,8 +42,8 @@ class User(AbstractUser):
     is_staff = models.BooleanField(_('Staff'), default=False)
     language = models.CharField(
         _('Language'),
-        choices=settings.WORD_LANGUAGES,
-        max_length=5
+        choices=settings.LANGUAGES,
+        max_length=7
     )
     objects = UserManager()
 
