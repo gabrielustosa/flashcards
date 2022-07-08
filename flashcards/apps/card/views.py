@@ -3,9 +3,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 
-from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card
+from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
 from flashcards.apps.deck.models import CardRelation, Deck
-from utils.translation import get_lexical_definitions, get_word_meanigs
+from utils.translation import get_word_definitions, get_word_meanigs
 
 
 class FlashCardView(TemplateView):
@@ -37,8 +37,9 @@ def turn_card_view(request, order, deck_id):
     if side == 'front':
         return render(request, 'includes/card/flashcard/front.html', context={'card': card.word, 'deck': deck})
 
-    meanings = WordMeaning.objects.filter(word=card.word).all()
-    return render(request, 'includes/card/flashcard/back.html', context={'card': card, 'meanings': meanings})
+    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=request.user).first()
+
+    return render(request, 'includes/card/flashcard/back.html', context={'card': card, 'word_meanings': word_meanings})
 
 
 def card_remove_view(request, order, deck_id):
@@ -78,48 +79,59 @@ def add_card(request, deck_id):
 
     user_langauge = request.user.language
 
-    word_query = Word.objects.filter(word=word, for_language=user_langauge)
+    word_query = Word.objects.filter(word=word)
 
     if word_query.exists():
         word_object = word_query.first()
 
-        card = Card.objects.create(word=word_object)
+        meaning_query = WordMeaning.objects.filter(word=word_object, for_language=user_langauge)
 
-        deck.cards.add(card)
+        if meaning_query.exists():
+            meaning = meaning_query.first()
+            WordUserMeaning.objects.create(meaning=meaning, user=request.user)
+        else:
+            meanings = get_word_meanigs(word, user_langauge)
+
+            meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
+            WordUserMeaning.objects.create(meaning=meaning, user=request.user)
+
     else:
-        result_definitions = get_lexical_definitions(word, user_langauge)
+
+        result_definitions = get_word_definitions(word)
 
         if not result_definitions:
             return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
 
-        result_meanings, synonyms = get_word_meanigs(word, user_langauge)
+        result_meanings = get_word_meanigs(word, user_langauge)
 
-        word_object = Word.objects.create(word=word, for_language=user_langauge, synonyms=synonyms)
+        audio_phonetic = result_definitions.get('audio')
+        synonyms = result_definitions.get('synonyms')
 
-        for result in result_definitions:
-            for headword, definitions in result.items():
-                for definition in definitions:
-                    headword_split = headword.split('-')
-                    headword_pos = headword_split[0]
-                    headword_text = headword_split[1]
+        word_object = Word.objects.create(
+            word=word,
+            synonyms=synonyms,
+            audio_phonetic=audio_phonetic
+        )
 
-                    WordDefinition.objects.create(
-                        word=word_object,
-                        headword_pos=headword_pos,
-                        headword_text=headword_text,
-                        for_language=user_langauge,
-                        definition=definition
-                    )
+        for result in result_definitions.get('meaning'):
+            pos_tag = result.get('partOfSpeech')
+            for definition_result in result.get('definitions'):
+                definition = definition_result.get('definition')
+                example = None
+                if definition_result.get('example'):
+                    example = definition_result.get('example')
+                WordDefinition.objects.create(
+                    word=word_object,
+                    pos_tag=pos_tag,
+                    definition=definition,
+                    example=example
+                )
 
-        for meaning in result_meanings:
-            WordMeaning.objects.create(
-                word=word_object,
-                for_language=user_langauge,
-                meaning=meaning
-            )
+        meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=result_meanings)
+        WordUserMeaning.objects.create(meaning=meaning, user=request.user)
 
-        card = Card.objects.create(word=word_object)
+    card = Card.objects.create(word=word_object)
 
-        deck.cards.add(card)
+    deck.cards.add(card)
 
     return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))

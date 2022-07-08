@@ -1,32 +1,14 @@
-import tempfile
-
-from django.conf import settings
-from django.core.files import File
 from django.db import models
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from flashcards.apps.core.models import UrlBase, TimeStampedBase, CreatorBase
-
-from gtts import gTTS
+from flashcards.apps.user.models import User
 
 
 class Word(UrlBase):
     word = models.CharField(_('Word'), max_length=100)
-    audio_phonetic = models.FileField(_('Audio'), upload_to='phonetics/', null=True)
-    for_language = models.CharField(_('Language'), max_length=7)
+    audio_phonetic = models.URLField(_('Audio'), null=True)
     synonyms = models.TextField(_('Synonyms'))
-
-    def save(self, *args, **kwargs):
-        if not self.audio_phonetic:
-            audio = gTTS(text=self.word, lang='en', slow=True)
-
-            with tempfile.TemporaryFile(mode='wb+') as file:
-                audio.write_to_fp(file)
-                file_name = f'{slugify(self.word)}.mp3'
-                self.audio_phonetic.save(file_name, File(file=file))
-
-            super().save(*args, **kwargs)
 
     def get_synonyms(self):
         return [synonym for synonym in self.synonyms.split('|')]
@@ -41,10 +23,9 @@ class WordDefinition(models.Model):
         related_name='definitions',
         on_delete=models.CASCADE
     )
-    headword_pos = models.CharField(_('Headword Pos'), max_length=100)
-    headword_text = models.CharField(_('Headword Text'), max_length=100)
-    for_language = models.CharField(_('Language'), max_length=5)
+    pos_tag = models.CharField(_('Pos Tag'), max_length=100)
     definition = models.TextField(_('Definition'))
+    example = models.TextField(_('Example'), null=True)
 
 
 class WordMeaning(models.Model):
@@ -53,13 +34,27 @@ class WordMeaning(models.Model):
         related_name='meanings',
         on_delete=models.CASCADE
     )
-    for_language = models.CharField(_('Language'), max_length=5)
-    meaning = models.TextField(_('Meaning'))
+    for_language = models.CharField(_('Language'), max_length=7)
+    meanings = models.TextField(_('Meanings'))
 
 
 class Card(UrlBase, TimeStampedBase, CreatorBase):
-    language = models.CharField(_('Language'), max_length=5)
+    language = models.CharField(_('Language'), max_length=7)
     word = models.ForeignKey(
         Word,
         on_delete=models.CASCADE
     )
+
+
+class WordUserMeaning(models.Model):
+    meaning = models.ForeignKey(
+        WordMeaning,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    def get_meanings(self):
+        return [meaning for meaning in self.meaning.meanings.split('|')]

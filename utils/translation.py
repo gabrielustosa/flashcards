@@ -2,10 +2,6 @@ import requests
 import os
 import uuid
 
-lexicala_headers = {
-    "X-RapidAPI-Key": os.environ.get('LEXICALA_API_KEY'),
-    "X-RapidAPI-Host": "lexicala1.p.rapidapi.com"
-}
 
 microsoft_headers = {
     'Ocp-Apim-Subscription-Key': os.environ.get('MICROSOFT_API_KEY'),
@@ -17,42 +13,32 @@ microsoft_headers = {
 microsoft_endpoint = 'https://api.cognitive.microsofttranslator.com'
 
 
-def get_lexical_definitions(word, to_language):
-    url = f'https://lexicala1.p.rapidapi.com/search?source=global&language=en&text={word}&analyzed=true'
+def get_word_definitions(word):
+    response = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}')
 
-    response_json = requests.request('GET', url, headers=lexicala_headers).json()
-
-    if not response_json['results']:
+    if response.status_code == 404:
         return None
 
-    definitions = []
+    json = response.json()[0]
 
-    for result in response_json['results']:
-        result_definitions = []
+    result = {}
 
-        for sense in result['senses']:
-            sense = sense.get('definition')
-            if sense:
-                sense_translated = get_text_translated(sense, to_language)
-                result_definitions.append(sense_translated)
-
-            if isinstance(result['headword'], dict):
-
-                try:
-                    headword_pos = result['headword']['pos']
-                except KeyError:
-                    headword_pos = 'NOUN'
-
-                headword_text = result['headword']['text']
-
-                headword = headword_pos.upper() + '-' + headword_text
-
-                headword_translated = headword
-                result_dict = {headword_translated: result_definitions}
-
-                definitions.append(result_dict)
-
-    return definitions
+    for json_result in json.items():
+        key, value = json_result
+        if key == 'phonetics':
+            for phonetics in value:
+                if phonetics['audio']:
+                    result['audio'] = phonetics['audio']
+        if key == 'meanings':
+            result_meaning = []
+            synonyms = []
+            for meaning in value:
+                result_meaning.append(meaning)
+                if meaning.get('synonyms'):
+                    synonyms.extend(meaning.get('synonyms'))
+            result['meaning'] = result_meaning
+            result['synonyms'] = synonyms
+    return result
 
 
 def get_text_translated(sentence, to_language):
@@ -94,17 +80,12 @@ def get_word_meanigs(word, to_language):
     response = request.json()
 
     meanings = set()
-    similar = set()
 
     for translation in response[0]['translations']:
-        for back_translation in translation['backTranslations']:
-            if back_translation['normalizedText'] != word:
-                similar.add(back_translation['normalizedText'])
         meanings.add(f'{translation["normalizedTarget"]}')
 
-    return meanings, '|'.join(similar)
+    return '|'.join(meanings)
 
 
 if __name__ == '__main__':
-    print(get_lexical_definitions('Think', 'pt-br'))
-    print(get_word_meanigs('Think', 'pt-br'))
+    teste = get_word_definitions('Same')
