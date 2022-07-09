@@ -1,0 +1,17 @@
+{% load i18n tailwind_filters %}
+
+<div class="grow">
+    <h1 class="text-3xl p-5 font-bold">{% trans 'Significados' %}</h1>
+    <div id="meaning-list" class="grid grid-rows-5 grid-flow-col text-2xl pt-8 p-10">
+        {% include 'includes/card/flashcard/meaning_list.html' %}
+    </div>
+    <div class="absolute bottom-0 right-0 p-6">
+        <form hx-post="{% url 'card:add_meaning' word.id %}" hx-target="#meaning-list">
+            {% csrf_token %}
+            {{ edit_form|crispy }}
+            <button class="p-2 bg-green-700 rounded-lg w-full text-white">
+                {% trans 'Adicionar' %}
+            </button>
+        </form>
+    </div>
+</div>

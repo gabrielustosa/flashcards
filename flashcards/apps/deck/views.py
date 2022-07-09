@@ -24,6 +24,8 @@ class DeckView(TemplateView):
 
         context['add_form'] = CardForm()
 
+        context['current_card_number'] = 1 if card else 0
+
         return context
 
 

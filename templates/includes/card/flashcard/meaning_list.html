@@ -1,0 +1,9 @@
+{% for meaning in word_meanings.get_meanings %}
+    <span class="p-1">
+        <i class="bi bi-trash3-fill text-red-500 cursor-pointer"
+           hx-get="{% url 'card:remove_meaning' word.id %}?value={{ forloop.counter0 }}"
+           hx-target="#meaning-list">
+        </i>
+        {{ meaning }}
+    </span>
+{% endfor %}

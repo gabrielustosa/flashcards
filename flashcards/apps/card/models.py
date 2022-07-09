@@ -55,6 +55,7 @@ class WordUserMeaning(models.Model):
         User,
         on_delete=models.CASCADE
     )
+    meanings = models.TextField(_('Meanings'))
 
     def get_meanings(self):
-        return [meaning for meaning in self.meaning.meanings.split('|')]
+        return [meaning for meaning in self.meanings.split('|')]

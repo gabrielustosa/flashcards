@@ -1,30 +1,27 @@
 from django.db.models import F, ExpressionWrapper, PositiveIntegerField
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import TemplateView
 
+from flashcards.apps.card.forms import CardForm
 from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
 from flashcards.apps.deck.models import CardRelation, Deck
+
 from utils.translation import get_word_definitions, get_word_meanigs
 
 
-class FlashCardView(TemplateView):
-    template_name = 'includes/card/flashcard/front.html'
+def card_view(request, order, deck_id):
+    deck = Deck.objects.filter(id=deck_id).first()
 
-    def get_context_data(self, **kwargs):
-        context = super(FlashCardView, self).get_context_data(**kwargs)
+    card_relation = CardRelation.objects.filter(deck=deck, order=order).first()
 
-        deck = Deck.objects.filter(id=self.kwargs.get('deck_id')).first()
+    card = card_relation.card
 
-        card_relation = CardRelation.objects.filter(deck=deck, order=self.kwargs.get('order')).first()
+    context = {
+        'card': card.word,
+        'deck': deck
+    }
 
-        card = card_relation.card
-
-        context['card'] = card.word
-
-        context['deck'] = deck
-
-        return context
+    return render(request, 'includes/card/flashcard/front.html', context=context)
 
 
 def turn_card_view(request, order, deck_id):
@@ -37,7 +34,7 @@ def turn_card_view(request, order, deck_id):
     if side == 'front':
         return render(request, 'includes/card/flashcard/front.html', context={'card': card.word, 'deck': deck})
 
-    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=request.user).first()
+    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=deck.creator).first()
 
     return render(request, 'includes/card/flashcard/back.html', context={'card': card, 'word_meanings': word_meanings})
 
@@ -69,6 +66,8 @@ def card_remove_view(request, order, deck_id):
     CardRelation.objects.filter(deck=deck, order__gt=order).update(
         order=ExpressionWrapper(F('order') - 1, output_field=PositiveIntegerField))
 
+    WordUserMeaning.objects.filter(user=deck.creator, meaning__word=card.word).delete()
+
     return render(request, 'includes/card/flashcard/front.html', context=context)
 
 
@@ -88,12 +87,12 @@ def add_card(request, deck_id):
 
         if meaning_query.exists():
             meaning = meaning_query.first()
-            WordUserMeaning.objects.create(meaning=meaning, user=request.user)
+            WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
         else:
             meanings = get_word_meanigs(word, user_langauge)
 
             meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
-            WordUserMeaning.objects.create(meaning=meaning, user=request.user)
+            WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
 
     else:
 
@@ -113,6 +112,8 @@ def add_card(request, deck_id):
             audio_phonetic=audio_phonetic
         )
 
+        word_definitions_object = []
+
         for result in result_definitions.get('meaning'):
             pos_tag = result.get('partOfSpeech')
             for definition_result in result.get('definitions'):
@@ -120,18 +121,82 @@ def add_card(request, deck_id):
                 example = None
                 if definition_result.get('example'):
                     example = definition_result.get('example')
-                WordDefinition.objects.create(
+                word_definition = WordDefinition(
                     word=word_object,
                     pos_tag=pos_tag,
                     definition=definition,
                     example=example
                 )
+                word_definitions_object.append(word_definition)
+
+        WordDefinition.objects.bulk_create(word_definitions_object)
 
         meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=result_meanings)
-        WordUserMeaning.objects.create(meaning=meaning, user=request.user)
+        WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
 
     card = Card.objects.create(word=word_object)
 
     deck.cards.add(card)
 
     return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
+
+
+def edit_card(request, order, deck_id):
+    deck = Deck.objects.filter(id=deck_id).first()
+
+    card = CardRelation.objects.filter(deck=deck, order=order).first().card
+
+    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=deck.creator).first()
+
+    edit_form = CardForm()
+
+    return render(request, 'includes/card/flashcard/edit.html',
+                  context={
+                      'word': card.word,
+                      'word_meanings': word_meanings,
+                      'edit_form': edit_form
+                  })
+
+
+def remove_meaning(request, word_id):
+    word_meanings = WordUserMeaning.objects.filter(meaning__word__id=word_id, user=request.user).first()
+
+    value = int(request.GET.get('value'))
+    meanings = word_meanings.get_meanings()
+
+    meanings.pop(value)
+    meanings = '|'.join(meanings)
+
+    word_meanings.meanings = meanings
+    word_meanings.save()
+
+    word = Word.objects.filter(id=word_id).first()
+
+    return render(request, 'includes/card/flashcard/meaning_list.html',
+                  context={
+                      'word': word,
+                      'word_meanings': word_meanings,
+                  })
+
+
+def add_meanning(request, word_id):
+    word_meanings = WordUserMeaning.objects.filter(meaning__word__id=word_id, user=request.user).first()
+
+    word = request.POST.get('word')
+
+    meanings = word_meanings.get_meanings()
+
+    if word != "" and word not in meanings:
+        meanings.append(word)
+        meanings = '|'.join(meanings)
+
+        word_meanings.meanings = meanings
+        word_meanings.save()
+
+    word = Word.objects.filter(id=word_id).first()
+
+    return render(request, 'includes/card/flashcard/meaning_list.html',
+                  context={
+                      'word': word,
+                      'word_meanings': word_meanings,
+                  })

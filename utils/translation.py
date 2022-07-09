@@ -88,4 +88,5 @@ def get_word_meanigs(word, to_language):
 
 
 if __name__ == '__main__':
-    teste = get_word_definitions('Same')
+    teste = get_word_definitions('for')
+    print(teste)
