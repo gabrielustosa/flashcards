@@ -16,9 +16,11 @@
         <div class="grid grid-cols-4 min-h-max">
             <div class="pt-12 pl-5">
                 <ul class="text-lg font-semibold text-gray-700 space-y-4">
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
-                        <i class="bi bi-card-text pr-4"></i>{% trans 'Cartões' %}
-                    </li>
+                    <a href="{% url 'deck:view' deck.id %}">
+                        <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                            <i class="bi bi-card-text pr-4"></i>{% trans 'Cartões' %}
+                        </li>
+                    </a>
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
                         <i class="bi bi-question-octagon-fill pr-4"></i>{% trans 'Questões' %}
                     </li>
@@ -28,33 +30,16 @@
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
                         <i class="bi bi-info-circle-fill pr-4"></i>{% trans 'Informações' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
-                        data-modal-toggle="create-flashcard">
-                        <i class="bi bi-plus-lg pr-4"></i>{% trans 'Adicionar' %}
-                    </li>
+                    {% if request.user == deck.creator %}
+                        <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                            data-modal-toggle="create-flashcard">
+                            <i class="bi bi-plus-lg pr-4"></i>{% trans 'Adicionar' %}
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
-            <div class="col-span-3">
-                <div class="relative flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
-                    <div class="absolute right-0 text-gray-700 p-5 text-xl cursor-pointer">
-                        <div class="flex items-center space-x-4">
-                            <div id="edit-card" _="on click toggle between .edit and .close then call editCard()"
-                                 class="close">
-                                <i class="bi bi-pencil-fill pr-2"></i>
-                                {% trans 'Editar' %}
-                            </div>
-                            <div data-modal-toggle="delete-flashcard">
-                                <i class="bi bi-trash3-fill pr-2"></i>
-                                {% trans 'Apagar' %}
-                            </div>
-                        </div>
-                    </div>
-                    <div id="flashcard" class="flex flex-col grow">
-                        {% include 'includes/card/flashcard/front.html' %}
-                    </div>
-                </div>
-                <input id="current-card" type="hidden" value="{{ current_card_number }}">
-                <input id="current-side" type="hidden" value="front">
+            <div id="content" class="col-span-3">
+                {% include 'includes/card/flashcard.html' %}
             </div>
         </div>
     </div>
@@ -78,6 +63,8 @@
         }
 
         function deleteCard() {
+            close()
+
             let current_card = document.querySelector('#current-card').value
 
             htmx.ajax('GET', `/card/remove/${current_card}/{{ deck.id }}`, '#flashcard')
@@ -101,6 +88,25 @@
                 edit_element.innerHTML = '<i class="bi bi-pencil-fill pr-2"></i> {% trans "Editar" %}'
             }
         }
+
+        const delete_element = document.getElementById('delete-flashcard');
+        const delete_modal = new Modal(delete_element);
+
+        function open() {
+            delete_modal.show()
+        }
+
+        function close() {
+            delete_modal.hide()
+
+            let backdrop = document.querySelector('[modal-backdrop]')
+            if (backdrop != null) backdrop.remove()
+        }
+
+        function teste() {
+            console.log('teste')
+        }
+
 
     </script>
 {% endblock %}

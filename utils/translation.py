@@ -2,7 +2,6 @@ import requests
 import os
 import uuid
 
-
 microsoft_headers = {
     'Ocp-Apim-Subscription-Key': os.environ.get('MICROSOFT_API_KEY'),
     'Ocp-Apim-Subscription-Region': 'brazilsouth',
@@ -78,6 +77,9 @@ def get_word_meanigs(word, to_language):
     request = requests.post(constructed_url, params=params, headers=microsoft_headers, json=[{'text': word}])
 
     response = request.json()
+
+    if not response[0]['translations']:
+        return None
 
     meanings = set()
 

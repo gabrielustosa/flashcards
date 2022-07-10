@@ -7,8 +7,8 @@ from flashcards.apps.user.models import User
 
 class Word(UrlBase):
     word = models.CharField(_('Word'), max_length=100)
-    audio_phonetic = models.URLField(_('Audio'), null=True)
-    synonyms = models.TextField(_('Synonyms'))
+    audio_phonetic = models.URLField(_('Audio'))
+    synonyms = models.TextField(_('Synonyms'), null=True)
 
     def get_synonyms(self):
         return [synonym for synonym in self.synonyms.split('|')]
@@ -47,8 +47,8 @@ class Card(UrlBase, TimeStampedBase, CreatorBase):
 
 
 class WordUserMeaning(models.Model):
-    meaning = models.ForeignKey(
-        WordMeaning,
+    word = models.ForeignKey(
+        Word,
         on_delete=models.CASCADE
     )
     user = models.ForeignKey(

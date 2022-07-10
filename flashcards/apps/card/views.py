@@ -6,7 +6,9 @@ from flashcards.apps.card.forms import CardForm
 from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
 from flashcards.apps.deck.models import CardRelation, Deck
 
-from utils.translation import get_word_definitions, get_word_meanigs
+from utils.audio import get_word_phonetic
+
+from utils.translation import get_word_definitions, get_word_meanigs, get_text_translated
 
 
 def card_view(request, order, deck_id):
@@ -34,7 +36,7 @@ def turn_card_view(request, order, deck_id):
     if side == 'front':
         return render(request, 'includes/card/flashcard/front.html', context={'card': card.word, 'deck': deck})
 
-    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=deck.creator).first()
+    word_meanings = WordUserMeaning.objects.filter(word=card.word, user=deck.creator).first()
 
     return render(request, 'includes/card/flashcard/back.html', context={'card': card, 'word_meanings': word_meanings})
 
@@ -45,6 +47,8 @@ def card_remove_view(request, order, deck_id):
     card = CardRelation.objects.filter(deck=deck, order=order).first().card
 
     deck.cards.remove(card)
+
+    card.delete()
 
     new_card = None
 
@@ -66,7 +70,7 @@ def card_remove_view(request, order, deck_id):
     CardRelation.objects.filter(deck=deck, order__gt=order).update(
         order=ExpressionWrapper(F('order') - 1, output_field=PositiveIntegerField))
 
-    WordUserMeaning.objects.filter(user=deck.creator, meaning__word=card.word).delete()
+    WordUserMeaning.objects.filter(user=deck.creator, word=card.word).delete()
 
     return render(request, 'includes/card/flashcard/front.html', context=context)
 
@@ -74,11 +78,14 @@ def card_remove_view(request, order, deck_id):
 def add_card(request, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
-    word = request.POST.get('word').capitalize()
+    word = request.POST.get('word').strip().capitalize()
 
     user_langauge = request.user.language
 
     word_query = Word.objects.filter(word=word)
+
+    if WordUserMeaning.objects.filter(word__word=word, user=request.user).exists():
+        return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
 
     if word_query.exists():
         word_object = word_query.first()
@@ -87,24 +94,32 @@ def add_card(request, deck_id):
 
         if meaning_query.exists():
             meaning = meaning_query.first()
-            WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
+            WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=meaning.meanings)
         else:
             meanings = get_word_meanigs(word, user_langauge)
 
+            if not meanings:
+                meanings = get_text_translated(word, user_langauge)
+
             meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
-            WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
+            WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=meaning.meanings)
 
     else:
-
         result_definitions = get_word_definitions(word)
 
-        if not result_definitions:
-            return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
+        meanings = get_word_meanigs(word, user_langauge)
 
-        result_meanings = get_word_meanigs(word, user_langauge)
+        if not meanings:
+            meanings = get_text_translated(word, user_langauge)
 
-        audio_phonetic = result_definitions.get('audio')
-        synonyms = result_definitions.get('synonyms')
+        synonyms = None
+        if result_definitions:
+            audio_phonetic = result_definitions.get('audio')
+            if not audio_phonetic:
+                audio_phonetic = get_word_phonetic(word)
+            synonyms = '|'.join(result_definitions.get('synonyms'))
+        else:
+            audio_phonetic = get_word_phonetic(word)
 
         word_object = Word.objects.create(
             word=word,
@@ -112,27 +127,26 @@ def add_card(request, deck_id):
             audio_phonetic=audio_phonetic
         )
 
-        word_definitions_object = []
+        if result_definitions:
+            word_definitions_objects = []
 
-        for result in result_definitions.get('meaning'):
-            pos_tag = result.get('partOfSpeech')
-            for definition_result in result.get('definitions'):
-                definition = definition_result.get('definition')
-                example = None
-                if definition_result.get('example'):
-                    example = definition_result.get('example')
-                word_definition = WordDefinition(
-                    word=word_object,
-                    pos_tag=pos_tag,
-                    definition=definition,
-                    example=example
-                )
-                word_definitions_object.append(word_definition)
+            for result in result_definitions.get('meaning'):
+                pos_tag = result.get('partOfSpeech')
+                for definition_result in result.get('definitions'):
+                    definition = definition_result.get('definition')
+                    example = None
+                    if definition_result.get('example'):
+                        example = definition_result.get('example')
+                    word_definitions_objects.append(WordDefinition(
+                        word=word_object,
+                        pos_tag=pos_tag,
+                        definition=definition,
+                        example=example
+                    ))
+            WordDefinition.objects.bulk_create(word_definitions_objects)
 
-        WordDefinition.objects.bulk_create(word_definitions_object)
-
-        meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=result_meanings)
-        WordUserMeaning.objects.create(meaning=meaning, user=request.user, meanings=meaning.meanings)
+        meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
+        WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=meaning.meanings)
 
     card = Card.objects.create(word=word_object)
 
@@ -146,7 +160,7 @@ def edit_card(request, order, deck_id):
 
     card = CardRelation.objects.filter(deck=deck, order=order).first().card
 
-    word_meanings = WordUserMeaning.objects.filter(meaning__word=card.word, user=deck.creator).first()
+    word_meanings = WordUserMeaning.objects.filter(word=card.word, user=deck.creator).first()
 
     edit_form = CardForm()
 
@@ -159,7 +173,7 @@ def edit_card(request, order, deck_id):
 
 
 def remove_meaning(request, word_id):
-    word_meanings = WordUserMeaning.objects.filter(meaning__word__id=word_id, user=request.user).first()
+    word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
     value = int(request.GET.get('value'))
     meanings = word_meanings.get_meanings()
@@ -170,17 +184,15 @@ def remove_meaning(request, word_id):
     word_meanings.meanings = meanings
     word_meanings.save()
 
-    word = Word.objects.filter(id=word_id).first()
-
     return render(request, 'includes/card/flashcard/meaning_list.html',
                   context={
-                      'word': word,
+                      'word': word_meanings.word,
                       'word_meanings': word_meanings,
                   })
 
 
 def add_meanning(request, word_id):
-    word_meanings = WordUserMeaning.objects.filter(meaning__word__id=word_id, user=request.user).first()
+    word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
     word = request.POST.get('word')
 
@@ -193,10 +205,8 @@ def add_meanning(request, word_id):
         word_meanings.meanings = meanings
         word_meanings.save()
 
-    word = Word.objects.filter(id=word_id).first()
-
     return render(request, 'includes/card/flashcard/meaning_list.html',
                   context={
-                      'word': word,
+                      'word': word_meanings.word,
                       'word_meanings': word_meanings,
                   })

@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<div class="relative flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
+    {% if request.user == deck.creator %}
+        <div class="absolute right-0 text-gray-700 p-5 text-xl cursor-pointer">
+            <div class="flex items-center space-x-4">
+                <div id="edit-card" _="on click toggle between .edit and .close then call editCard()"
+                     class="close">
+                    <i class="bi bi-pencil-fill pr-2"></i>
+                    {% trans 'Editar' %}
+                </div>
+                <div _="on click call open()">
+                    <i class="bi bi-trash3-fill pr-2"></i>
+                    {% trans 'Apagar' %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div id="flashcard" class="flex flex-col grow">
+        {% include 'includes/card/flashcard/front.html' %}
+    </div>
+</div>
+<input id="current-card" type="hidden" value="{{ current_card_number }}">
+<input id="current-side" type="hidden" value="front">
