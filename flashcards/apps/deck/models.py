@@ -20,10 +20,6 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
     class Meta:
         ordering = ['id']
 
-    def has_cards(self):
-        print(self.cards.count())
-        return 0 if self.cards.count() <= 1 else 1
-
     def get_last_order(self):
         return self.cards.aggregate(last_order=Max('cardrelation__order')).get('last_order')
 

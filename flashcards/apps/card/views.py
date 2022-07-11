@@ -95,7 +95,7 @@ def card_remove_view(request, order, deck_id):
     return card_view(request, new_order, deck_id)
 
 
-def add_card(request, deck_id):
+def add_card_view(request, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
     word = request.POST.get('word').strip().capitalize()
@@ -177,7 +177,7 @@ def add_card(request, deck_id):
     return card_view(request, order, deck_id)
 
 
-def edit_card(request, order, deck_id):
+def edit_card_view(request, order, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
     card = CardRelation.objects.filter(deck=deck, order=order).first().card
@@ -194,7 +194,7 @@ def edit_card(request, order, deck_id):
                   })
 
 
-def remove_meaning(request, word_id):
+def remove_meaning_view(request, word_id):
     word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
     value = int(request.GET.get('value'))
@@ -213,7 +213,7 @@ def remove_meaning(request, word_id):
                   })
 
 
-def add_meanning(request, word_id):
+def add_meanning_view(request, word_id):
     word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
     word = request.POST.get('word')

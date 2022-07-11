@@ -22,13 +22,16 @@
                 <div class="text-lg">
                     {% trans 'Digite abaixo a palavra que você adicionar' %}
                 </div>
-                <form hx-post="{% url 'card:add' deck.id %}" hx-target="#content">
+                <form hx-post="{% url 'card:add' deck.id %}" hx-target="#content" hx-indicator="#load">
                     {% csrf_token %}
                     {{ add_form|crispy }}
                     <button data-modal-toggle="create-flashcard" type="submit"
+                            _="on click call load()"
                             class="p-2 bg-green-700 rounded-lg text-white">
                         {% trans 'Adicionar' %}
                     </button>
+                    <div id="load">
+                    </div>
                 </form>
             </div>
         </div>
