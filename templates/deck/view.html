@@ -69,8 +69,9 @@
 
             htmx.ajax('GET', `/card/remove/${current_card}/{{ deck.id }}`, '#flashcard')
 
-            if (current_card >= 1)
-                document.querySelector('#current-card').value = current_card - 1
+            document.querySelector('#current-card').value = current_card - 1
+            if ('{{ deck.has_cards }}' === '0')
+                document.querySelector('#current-card').value = 0
         }
 
         function editCard() {
@@ -102,11 +103,5 @@
             let backdrop = document.querySelector('[modal-backdrop]')
             if (backdrop != null) backdrop.remove()
         }
-
-        function teste() {
-            console.log('teste')
-        }
-
-
     </script>
 {% endblock %}

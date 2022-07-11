@@ -19,6 +19,9 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
     class Meta:
         ordering = ['id']
 
+    def has_cards(self):
+        return 1 if self.cards.exists() else 0
+
     def get_first_card(self):
         try:
             return CardRelation.objects.filter(deck=self).order_by('order').first().card

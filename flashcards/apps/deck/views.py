@@ -11,9 +11,7 @@ class DeckView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DeckView, self).get_context_data(**kwargs)
 
-        deck_id = self.kwargs.get('deck_id')
-
-        deck = Deck.objects.filter(id=deck_id).first()
+        deck = Deck.objects.filter(id=self.kwargs.get('deck_id')).first()
 
         context['deck'] = deck
 

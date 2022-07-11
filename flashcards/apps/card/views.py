@@ -113,12 +113,12 @@ def add_card(request, deck_id):
             meanings = get_text_translated(word, user_langauge)
 
         synonyms = None
+        audio_phonetic = None
         if result_definitions:
             audio_phonetic = result_definitions.get('audio')
-            if not audio_phonetic:
-                audio_phonetic = get_word_phonetic(word)
             synonyms = '|'.join(result_definitions.get('synonyms'))
-        else:
+
+        if not audio_phonetic:
             audio_phonetic = get_word_phonetic(word)
 
         word_object = Word.objects.create(
