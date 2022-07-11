@@ -1,0 +1,15 @@
+{% load i18n %}
+
+<h1 class="text-3xl font-bold py-6">{% trans 'Informações' %}</h1>
+<div class="w-1/2 pb-4">
+    <div class="input-group relative flex flex-wrap items-stretch w-full mb-4">
+        <input type="search"
+               hx-post="{% url 'card:search_word' deck.id %}" hx-target="#word-list"
+               hx-trigger="keyup changed delay:500ms" name="search"
+               class="form-control relative flex-auto min-w-0 block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+               placeholder="{% trans 'Pesquisar' %}" aria-label="Search" aria-describedby="button-addon2">
+    </div>
+</div>
+<div id="word-list">
+    {% include 'includes/card/information/word_list.html' %}
+</div>

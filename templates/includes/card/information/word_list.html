@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<div class="grid grid-cols-4">
+    {% for card in cards %}
+        <div class="p-2 cursor-pointer hover:bg-gray-300"
+             hx-get="{% url 'card:word_information' deck.creator.id card.word.id %}"
+             hx-target="#content">
+            <div class="text-lg font-bold">{{ card.word }}</div>
+            <div class="text-sm text-gray-700 py-2">{% trans 'Clique para ver mais.' %}</div>
+        </div>
+    {% endfor %}
+</div>

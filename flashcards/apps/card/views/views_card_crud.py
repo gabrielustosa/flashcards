@@ -3,68 +3,12 @@ from django.shortcuts import render
 
 from flashcards.apps.card.forms import CardForm
 from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
+from flashcards.apps.card.views.views_card import card_view
 from flashcards.apps.deck.models import CardRelation, Deck
 
 from utils.audio import get_word_phonetic
 
 from utils.translation import get_word_definitions, get_word_meanigs, get_text_translated
-
-
-def card_view(request, order, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
-
-    card = None
-    current_card_order = 0
-
-    card_relation = CardRelation.objects.filter(deck=deck, order=order).first()
-
-    if card_relation:
-        card = card_relation.card.word
-        current_card_order = card_relation.order
-
-    return render(request, 'includes/card/flashcard.html', context={
-        'deck': deck,
-        'card': card,
-        'current_card_order': current_card_order,
-    })
-
-
-def change_card_view(request, order, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
-
-    card_relation = CardRelation.objects.filter(deck=deck, order=order).first()
-
-    card = None
-    if card_relation:
-        card = card_relation.card
-
-    context = {
-        'card': card.word,
-        'deck': deck
-    }
-
-    return render(request, 'includes/card/flashcard/front.html', context=context)
-
-
-def turn_card_view(request, order, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
-
-    card = CardRelation.objects.filter(deck=deck, order=order).first().card
-
-    side = request.GET.get('side')
-
-    if side == 'front':
-        return render(request, 'includes/card/flashcard/front.html', context={
-            'card': card.word,
-            'deck': deck,
-        })
-
-    word_meanings = WordUserMeaning.objects.filter(word=card.word, user=deck.creator).first()
-
-    return render(request, 'includes/card/flashcard/back.html', context={
-        'card': card,
-        'word_meanings': word_meanings
-    })
 
 
 def card_remove_view(request, order, deck_id):
@@ -191,44 +135,4 @@ def edit_card_view(request, order, deck_id):
                       'word': card.word,
                       'word_meanings': word_meanings,
                       'edit_form': edit_form
-                  })
-
-
-def remove_meaning_view(request, word_id):
-    word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
-
-    value = int(request.GET.get('value'))
-    meanings = word_meanings.get_meanings()
-
-    meanings.pop(value)
-    meanings = '|'.join(meanings)
-
-    word_meanings.meanings = meanings
-    word_meanings.save()
-
-    return render(request, 'includes/card/flashcard/meaning_list.html',
-                  context={
-                      'word': word_meanings.word,
-                      'word_meanings': word_meanings,
-                  })
-
-
-def add_meanning_view(request, word_id):
-    word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
-
-    word = request.POST.get('word')
-
-    meanings = word_meanings.get_meanings()
-
-    if word != "" and word not in meanings:
-        meanings.append(word)
-        meanings = '|'.join(meanings)
-
-        word_meanings.meanings = meanings
-        word_meanings.save()
-
-    return render(request, 'includes/card/flashcard/meaning_list.html',
-                  context={
-                      'word': word_meanings.word,
-                      'word_meanings': word_meanings,
                   })

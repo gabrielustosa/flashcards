@@ -10,18 +10,6 @@
     {% trans 'Cartões - ' %} {{ deck.name }}
 {% endblock %}
 
-{% block css %}
-    <style>
-        .load-indicator {
-            display: none;
-        }
-
-        .htmx-request .load-indicator {
-            display: inline;
-        }
-
-    </style>
-{% endblock %}
 
 {% block content %}
     <div class="p-10 min-h-full">
@@ -40,7 +28,9 @@
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
                         <i class="bi bi-pencil-fill pr-4"></i>{% trans 'Escrever' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                        hx-get="{% url 'card:information' deck.id %}"
+                        hx-target="#content">
                         <i class="bi bi-info-circle-fill pr-4"></i>{% trans 'Informações' %}
                     </li>
                     {% if request.user == deck.creator %}
