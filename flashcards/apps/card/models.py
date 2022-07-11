@@ -39,7 +39,6 @@ class WordMeaning(models.Model):
 
 
 class Card(UrlBase, TimeStampedBase, CreatorBase):
-    language = models.CharField(_('Language'), max_length=7)
     word = models.ForeignKey(
         Word,
         on_delete=models.CASCADE

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -20,19 +21,11 @@ class Deck(UrlBase, TimeStampedBase, CreatorBase):
         ordering = ['id']
 
     def has_cards(self):
-        return 1 if self.cards.exists() else 0
-
-    def get_first_card(self):
-        try:
-            return CardRelation.objects.filter(deck=self).order_by('order').first().card
-        except Exception:
-            pass
+        print(self.cards.count())
+        return 0 if self.cards.count() <= 1 else 1
 
     def get_last_order(self):
-        try:
-            return CardRelation.objects.filter(deck=self).order_by('order').last().order
-        except Exception:
-            pass
+        return self.cards.aggregate(last_order=Max('cardrelation__order')).get('last_order')
 
     def get_absolute_url(self):
         return reverse('deck:view', kwargs={'deck_id': self.id})

@@ -30,13 +30,13 @@ def get_word_definitions(word):
                     result['audio'] = phonetics['audio']
         if key == 'meanings':
             result_meaning = []
-            synonyms = []
+            synonyms = set()
             for meaning in value:
                 result_meaning.append(meaning)
                 if meaning.get('synonyms'):
-                    synonyms.extend(meaning.get('synonyms'))
+                    synonyms = synonyms.union(meaning.get('synonyms'))
             result['meaning'] = result_meaning
-            result['synonyms'] = synonyms
+            result['synonyms'] = '|'.join(synonyms)
     return result
 
 
@@ -56,7 +56,7 @@ def get_text_translated(sentence, to_language):
 
     response = request.json()
 
-    sentence_translated = response[0]['translations'][0]['text']
+    sentence_translated = response[0]['translations'][0]['text'].replace(',', '|')
 
     return sentence_translated
 

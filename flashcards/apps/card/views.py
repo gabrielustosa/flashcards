@@ -1,6 +1,5 @@
 from django.db.models import F, ExpressionWrapper, PositiveIntegerField
-from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.shortcuts import render
 
 from flashcards.apps.card.forms import CardForm
 from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
@@ -14,9 +13,30 @@ from utils.translation import get_word_definitions, get_word_meanigs, get_text_t
 def card_view(request, order, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
+    card = None
+    current_card_order = 0
+
     card_relation = CardRelation.objects.filter(deck=deck, order=order).first()
 
-    card = card_relation.card
+    if card_relation:
+        card = card_relation.card.word
+        current_card_order = card_relation.order
+
+    return render(request, 'includes/card/flashcard.html', context={
+        'deck': deck,
+        'card': card,
+        'current_card_order': current_card_order,
+    })
+
+
+def change_card_view(request, order, deck_id):
+    deck = Deck.objects.filter(id=deck_id).first()
+
+    card_relation = CardRelation.objects.filter(deck=deck, order=order).first()
+
+    card = None
+    if card_relation:
+        card = card_relation.card
 
     context = {
         'card': card.word,
@@ -34,45 +54,45 @@ def turn_card_view(request, order, deck_id):
     side = request.GET.get('side')
 
     if side == 'front':
-        return render(request, 'includes/card/flashcard/front.html', context={'card': card.word, 'deck': deck})
+        return render(request, 'includes/card/flashcard/front.html', context={
+            'card': card.word,
+            'deck': deck,
+        })
 
     word_meanings = WordUserMeaning.objects.filter(word=card.word, user=deck.creator).first()
 
-    return render(request, 'includes/card/flashcard/back.html', context={'card': card, 'word_meanings': word_meanings})
+    return render(request, 'includes/card/flashcard/back.html', context={
+        'card': card,
+        'word_meanings': word_meanings
+    })
 
 
 def card_remove_view(request, order, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
-    card = CardRelation.objects.filter(deck=deck, order=order).first().card
+    card_relation_query = CardRelation.objects.filter(deck=deck)
+
+    card = card_relation_query.filter(order=order).first().card
 
     deck.cards.remove(card)
 
     card.delete()
 
-    new_card = None
+    new_order = 0
 
     if order > 1:
-        previous_order = order - 1
-        new_card = CardRelation.objects.filter(deck=deck, order=previous_order).first().card
+        new_order = order - 1
+    else:
+        if deck.cards.count() > 0:
+            new_order = 1
 
-    if not new_card and CardRelation.objects.filter(deck=deck).exists():
-        next_order = order + 1
-        new_card = CardRelation.objects.filter(deck=deck, order=next_order).first().card
-
-    context = {
-        'deck': deck,
-    }
-
-    if new_card:
-        context.update({'card': new_card.word})
-
-    CardRelation.objects.filter(deck=deck, order__gt=order).update(
-        order=ExpressionWrapper(F('order') - 1, output_field=PositiveIntegerField))
+    card_relation_query.filter(order__gt=order).update(
+        order=ExpressionWrapper(F('order') - 1, output_field=PositiveIntegerField)
+    )
 
     WordUserMeaning.objects.filter(user=deck.creator, word=card.word).delete()
 
-    return render(request, 'includes/card/flashcard/front.html', context=context)
+    return card_view(request, new_order, deck_id)
 
 
 def add_card(request, deck_id):
@@ -84,8 +104,8 @@ def add_card(request, deck_id):
 
     word_query = Word.objects.filter(word=word)
 
-    if WordUserMeaning.objects.filter(word__word=word, user=request.user).exists():
-        return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
+    if deck.cards.filter(word__word=word).exists():
+        return card_view(request, 1, deck_id)
 
     if word_query.exists():
         word_object = word_query.first()
@@ -116,7 +136,7 @@ def add_card(request, deck_id):
         audio_phonetic = None
         if result_definitions:
             audio_phonetic = result_definitions.get('audio')
-            synonyms = '|'.join(result_definitions.get('synonyms'))
+            synonyms = result_definitions.get('synonyms')
 
         if not audio_phonetic:
             audio_phonetic = get_word_phonetic(word)
@@ -145,14 +165,16 @@ def add_card(request, deck_id):
                     ))
             WordDefinition.objects.bulk_create(word_definitions_objects)
 
-        meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
-        WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=meaning.meanings)
+        word_meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
+        WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=word_meaning.meanings)
 
     card = Card.objects.create(word=word_object)
 
     deck.cards.add(card)
 
-    return redirect(reverse('deck:view', kwargs={'deck_id': deck_id}))
+    order = CardRelation.objects.filter(deck=deck, card=card).first().order
+
+    return card_view(request, order, deck_id)
 
 
 def edit_card(request, order, deck_id):
