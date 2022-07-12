@@ -1,0 +1,117 @@
+{% load i18n %}
+
+<div class="grid grid-cols-3">
+    <div class="col-span-2 px-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-4xl font-bold">{% trans 'Escreva o que você escutar' %}</h1>
+            <span onclick="passListen()"
+                  class="text-lg font-medium text-red-500 cursor-pointer">{% trans 'Não sei' %}
+            </span>
+        </div>
+        <div id="listen-content">
+        </div>
+    </div>
+    <div class="px-3 space-y-6 w-4/5 mx-auto ">
+        <h1 class="text-xl font-bold py-4">{% trans 'Informações' %}</h1>
+        <div class="bg-gray-200 h-3">
+            <div id="remaining" class="bg-sky-700 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Restantes' %}</span>
+                <span id="remaining-text"></span>
+            </div>
+        </div>
+        <div class="bg-gray-200 h-3">
+            <div id="right" class="bg-green-600 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Corretas' %}</span>
+                <span id="right-text"></span>
+            </div>
+        </div>
+        <div class="bg-gray-200 h-3">
+            <div id="wrong" class="bg-red-400 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Incorretas' %}</span>
+                <span id="wrong-text"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var order = {{ listen_order }}
+
+    htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
+
+    var total = order.length
+
+    var right_answer = 0
+    var wrong_answer = 0
+
+    updateProgressBar('#remaining', order.length)
+    updateProgressText('#remaining-text', order.length)
+
+    for (let element_id of ['#right-text', '#wrong-text']) {
+        updateProgressText(element_id, 0)
+    }
+
+
+    function updateProgressBar(element_id, value) {
+        let progress_element = document.querySelector(element_id)
+
+        value = (value * 100) / total
+
+        progress_element.style.width = `${value}%`
+    }
+
+    function updateProgressText(element_id, value) {
+        let progress_element = document.querySelector(element_id)
+        progress_element.innerText = `${value}/${total}`
+    }
+
+    function delay(ms) {
+        return new Promise(res => setTimeout(res, ms));
+    }
+
+    async function passListen() {
+        order.shift()
+        if (order.length === 0) {
+            await delay(4000)
+            htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
+            return
+        }
+        htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
+        updateProgressBar('#remaining', order.length)
+        updateProgressText('#remaining-text', order.length)
+    }
+
+    function verifyWord(word_id, answer) {
+        fetch(`/card/listen/verify_word/${word_id}?answer=${answer}`)
+            .then(response => response.json())
+            .then(data => {
+                let answer_info = document.querySelector('#answer-info')
+                let word = data['word']
+                if (data['correct']) {
+                    answer_info.innerHTML = "{% trans 'Parabéns, Você acertou!' %}"
+                    answer_info.classList.add('bg-green-400')
+                    answer_info.classList.remove('hidden')
+                    right_answer += 1
+                    updateProgressBar('#right', right_answer)
+                    updateProgressText('#right-text', right_answer)
+                } else {
+                    answer_info.innerHTML = `{% trans 'Você errou! A resposta correta era ' %} ${word}`
+                    answer_info.classList.add('bg-red-400')
+                    answer_info.classList.remove('hidden')
+                    wrong_answer += 1
+                    updateProgressBar('#wrong', wrong_answer)
+                    updateProgressText('#wrong-text', wrong_answer)
+                }
+
+
+                setTimeout(() => {
+                    answer_info.classList.add('hidden')
+                    passListen()
+                }, 2000)
+
+            })
+    }
+
+</script>

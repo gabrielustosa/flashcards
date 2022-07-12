@@ -92,8 +92,6 @@ def add_card_view(request, deck_id):
         )
 
         if result_definitions:
-            word_definitions_objects = []
-
             for result in result_definitions.get('meaning'):
                 pos_tag = result.get('partOfSpeech')
                 for definition_result in result.get('definitions'):
@@ -101,13 +99,12 @@ def add_card_view(request, deck_id):
                     example = None
                     if definition_result.get('example'):
                         example = definition_result.get('example')
-                    word_definitions_objects.append(WordDefinition(
+                    WordDefinition.objects.create(
                         word=word_object,
                         pos_tag=pos_tag,
                         definition=definition,
                         example=example
-                    ))
-            WordDefinition.objects.bulk_create(word_definitions_objects)
+                    )
 
         word_meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
         WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=word_meaning.meanings)

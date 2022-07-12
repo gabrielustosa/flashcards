@@ -29,7 +29,7 @@ def add_meanning_view(request, word_id):
 
     meanings = word_meanings.get_meanings()
 
-    if word != "" and word not in meanings:
+    if word != "" and word.capitalize() not in meanings:
         meanings.append(word)
         meanings = '|'.join(meanings)
 

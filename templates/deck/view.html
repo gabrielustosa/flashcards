@@ -25,8 +25,10 @@
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
                         <i class="bi bi-question-octagon-fill pr-4"></i>{% trans 'Questões' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
-                        <i class="bi bi-pencil-fill pr-4"></i>{% trans 'Escrever' %}
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                        hx-get="{% url 'card:listen' deck.id %}"
+                        hx-target="#content">
+                        <i class="bi bi-ear pr-4"></i>{% trans 'Escutar' %}
                     </li>
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
                         hx-get="{% url 'card:information' deck.id %}"
@@ -74,6 +76,7 @@
                 if (!load_element.classList.contains('htmx-request')) {
                     spinner_element.classList.add('hidden')
                     clearInterval(interval)
+                    document.querySelector('#id_word').value = ''
                 }
             })
         }

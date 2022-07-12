@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import views_card_crud, views_meaning, views_card, views_information
+from .views import views_card_crud, views_meaning, views_card, views_information, views_listen
 
 app_name = 'card'
 
@@ -20,4 +20,7 @@ urlpatterns = [
     path('search_word/<int:deck_id>/', views_information.search_word_view, name='search_word'),
     path('word_information/<int:creator_id>/<int:word_id>/', views_information.information_word_view, name='word_information'),
 
+    path('listen/<int:deck_id>/', views_listen.listen_view, name='listen'),
+    path('listen/word/<int:deck_id>/<int:order>/', views_listen.listen_word_view, name='listen_word'),
+    path('listen/verify_word/<int:word_id>/', views_listen.listen_verify_view, name='listen_verify'),
 ]

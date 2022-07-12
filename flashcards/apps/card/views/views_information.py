@@ -1,7 +1,6 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 
-from flashcards.apps.card.models import WordDefinition, Word, WordUserMeaning
+from flashcards.apps.card.models import Word, WordUserMeaning
 from flashcards.apps.deck.models import Deck
 
 

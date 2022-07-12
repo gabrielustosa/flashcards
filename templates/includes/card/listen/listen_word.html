@@ -1,0 +1,20 @@
+{% load i18n %}
+
+<div onclick="document.getElementById('audio').play()" class="cursor-pointer text-xl py-5">
+    <i class="bi bi-volume-up-fill pr-2"></i>
+    {% trans 'Clique aqui para escutar novamente' %}
+</div>
+<div id="answer-info" class="hidden text-white text-lg font-bold px-8 max-w-fit rounded-lg">
+</div>
+<div class="flex flex-col pt-3 pb-8 w-full">
+    <input type="text" id="answer">
+    <button _="on click call verifyWord({{ word.id }}, #answer.value) then toggle @disabled"
+            class="bg-sky-700 p-2 px-4 rounded-lg mt-5 text-white">
+        {% trans 'Responder' %}
+    </button>
+</div>
+<audio id="audio" src="{{ word.audio_phonetic }}"></audio>
+
+<script>
+    document.getElementById('audio').play()
+</script>

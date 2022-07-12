@@ -16,7 +16,7 @@ def card_view(request, order, deck_id):
         card = card_relation.card.word
         current_card_order = card_relation.order
 
-    return render(request, 'includes/card/flashcard.html', context={
+    return render(request, 'includes/card/flashcard/flashcard.html', context={
         'deck': deck,
         'card': card,
         'current_card_order': current_card_order,
