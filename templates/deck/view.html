@@ -13,32 +13,32 @@
 
 {% block content %}
     <div class="p-10 min-h-full">
-        <h1 class="text-3xl font-bold">{{ deck.name }}</h1>
+        <h1 class="text-3xl font-bold dark:text-white">{{ deck.name }}</h1>
         <div class="grid grid-cols-4 min-h-max">
             <div class="pt-12 pl-5">
-                <ul class="text-lg font-semibold text-gray-700 space-y-4">
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                <ul class="text-lg font-semibold text-gray-700 space-y-4 dark:text-white">
+                    <li class="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 p-2 px-4 max-w-max"
                         hx-get="{% url 'card:view' 1 deck.id %}"
                         hx-target="#content">
                         <i class="bi bi-card-text pr-4"></i>{% trans 'Cartões' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                    <li class="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 p-2 px-4 max-w-max"
                         hx-get="{% url 'card:exercise' deck.id %}"
                         hx-target="#content">
                         <i class="bi bi-question-octagon-fill pr-4"></i>{% trans 'Questões' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                    <li class="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 p-2 px-4 max-w-max"
                         hx-get="{% url 'card:listen' deck.id %}"
                         hx-target="#content">
                         <i class="bi bi-ear pr-4"></i>{% trans 'Escutar' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                    <li class="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 p-2 px-4 max-w-max"
                         hx-get="{% url 'card:information' deck.id %}"
                         hx-target="#content">
                         <i class="bi bi-info-circle-fill pr-4"></i>{% trans 'Informações' %}
                     </li>
                     {% if request.user == deck.creator %}
-                        <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                        <li class="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 p-2 px-4 max-w-max"
                             data-modal-toggle="create-flashcard">
                             <i class="bi bi-plus-lg pr-4"></i>{% trans 'Adicionar' %}
                         </li>

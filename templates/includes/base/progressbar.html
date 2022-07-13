@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div class="px-3 space-y-6 w-4/5 mx-auto ">
+    <h1 class="text-xl font-bold py-4 dark:text-white">{% trans 'Informações' %}</h1>
+    <div class="bg-gray-200 h-3">
+        <div id="remaining" class="bg-sky-700 h-3" style="width: 0"></div>
+        <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium dark:text-white">
+            <span>{% trans 'Restantes' %}</span>
+            <span id="remaining-text"></span>
+        </div>
+    </div>
+    <div class="bg-gray-200 h-3">
+        <div id="right" class="bg-green-600 h-3" style="width: 0"></div>
+        <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium dark:text-white">
+            <span>{% trans 'Corretas' %}</span>
+            <span id="right-text"></span>
+        </div>
+    </div>
+    <div class="bg-gray-200 h-3">
+        <div id="wrong" class="bg-red-400 h-3" style="width: 0"></div>
+        <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium dark:text-white">
+            <span>{% trans 'Incorretas' %}</span>
+            <span id="wrong-text"></span>
+        </div>
+    </div>
+</div>

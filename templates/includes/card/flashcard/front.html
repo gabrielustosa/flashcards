@@ -1,16 +1,16 @@
 {% load i18n %}
 
-<div class="text-gray-700 p-5 text-xl">
+<div class="text-gray-700 p-5 text-xl dark:text-white">
     <div onclick="document.getElementById('audio').play()" class="cursor-pointer">
         <i class="bi bi-volume-up-fill pr-2"></i>
         {% trans 'Pronúncia' %}
     </div>
 </div>
-<div class="pt-32 text-center text-3xl font-medium grow"
+<div class="pt-32 text-center text-3xl font-medium grow dark:text-white"
      _="on click if #current-side.value === 'back' set #current-side.value to 'front' otherwise set #current-side.value to 'back' end get turnCard()">
     {{ card.word }}
 </div>
-<div class="flex justify-center py-8 text-3xl space-x-40">
+<div class="flex justify-center py-8 text-3xl space-x-40 dark:text-white">
     <div _="on click if #current-card.value > 1 decrement #current-card.value then call changeCard()"
          class="cursor-pointer">
         <i class="bi bi-chevron-left"></i>

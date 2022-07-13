@@ -1,8 +1,8 @@
 {% load i18n %}
 
-<div class="relative flex flex-col card-shadow rounded-xl" style="max-width: 80%; min-height: 60vh;">
+<div class="relative flex flex-col card-shadow rounded-xl dark:bg-gray-600" style="max-width: 80%; min-height: 60vh;">
     {% if request.user == deck.creator %}
-        <div class="absolute right-0 text-gray-700 p-5 text-xl cursor-pointer">
+        <div class="absolute right-0 text-gray-700 p-5 text-xl cursor-pointer dark:text-white">
             <div class="flex items-center space-x-4">
                 <div id="edit-card" _="on click toggle between .edit and .close then call editCard()"
                      class="close">

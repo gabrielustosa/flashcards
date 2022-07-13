@@ -19,7 +19,7 @@
                 </button>
             </div>
             <div class="p-6 space-y-6">
-                <div class="text-lg">
+                <div class="text-lg dark:text-white">
                     {% trans 'Digite abaixo a palavra que você adicionar' %}
                 </div>
                 <form hx-post="{% url 'card:add' deck.id %}" hx-target="#content" hx-indicator="#load" novalidate>

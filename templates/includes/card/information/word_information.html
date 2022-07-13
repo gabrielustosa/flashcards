@@ -1,9 +1,9 @@
 {% load i18n %}
 
-<div class="flex justify-between my-6">
-    <div class="space-y-3">
+<div class="flex justify-between my-6 dark:text-white">
+    <div class="space-y-3 dark:text-white">
         <h1 class="text-3xl font-bold">{% trans 'Definições da palavra ' %} "{{ word }}"</h1>
-        <div onclick="document.getElementById('audio').play()" class="cursor-pointer text-xl text-gray-700">
+        <div onclick="document.getElementById('audio').play()" class="cursor-pointer text-xl text-gray-700 dark:text-white">
             <i class="bi bi-volume-up-fill pr-2"></i>
             {% trans 'Pronúncia' %}
         </div>
@@ -16,14 +16,14 @@
     </div>
 </div>
 <audio id="audio" src="{{ word.audio_phonetic }}"></audio>
-<div class="py-4 space-y-3">
+<div class="py-4 space-y-3 dark:text-white">
     <h1 class="text-xl font-bold">{% trans 'Significados' %}</h1>
     <div class="text-lg">
         {{ word_meanings.get_meanings_list }}
     </div>
 </div>
 {% if word.synonyms %}
-    <div class="py-4 space-y-3">
+    <div class="py-4 space-y-3 dark:text-white">
         <h1 class="text-xl font-bold">{% trans 'Sinônimos' %}</h1>
         <div class="text-lg">
             {{ word.get_synonyms_list }}
@@ -31,7 +31,7 @@
     </div>
 {% endif %}
 {% if word_definitions %}
-    <div class="py-4 space-y-3">
+    <div class="py-4 space-y-3 dark:text-white">
         <h1 class="text-xl font-bold">{% trans 'Morfologia' %}</h1>
         {% for word_definition in word_definitions %}
             <div class="py-3 space-y-1">

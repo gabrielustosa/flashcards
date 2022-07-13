@@ -3,43 +3,20 @@
 <div class="grid grid-cols-3">
     <div class="col-span-2 px-6">
         <div class="flex justify-between items-center">
-            <h1 class="text-4xl font-bold">{% trans 'Escreva o que você escutar' %}</h1>
+            <h1 class="text-4xl font-bold dark:text-white">{% trans 'Escreva o que você escutar' %}</h1>
             <span onclick="passListen()"
-                  class="text-lg font-medium text-red-500 cursor-pointer">{% trans 'Não sei' %}
+                  class="text-lg font-medium text-red-500 dark:text-red-700 cursor-pointer">{% trans 'Não sei' %}
             </span>
         </div>
         <div id="listen-content">
         </div>
     </div>
-    <div class="px-3 space-y-6 w-4/5 mx-auto ">
-        <h1 class="text-xl font-bold py-4">{% trans 'Informações' %}</h1>
-        <div class="bg-gray-200 h-3">
-            <div id="remaining" class="bg-sky-700 h-3" style="width: 0"></div>
-            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
-                <span>{% trans 'Restantes' %}</span>
-                <span id="remaining-text"></span>
-            </div>
-        </div>
-        <div class="bg-gray-200 h-3">
-            <div id="right" class="bg-green-600 h-3" style="width: 0"></div>
-            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
-                <span>{% trans 'Corretas' %}</span>
-                <span id="right-text"></span>
-            </div>
-        </div>
-        <div class="bg-gray-200 h-3">
-            <div id="wrong" class="bg-red-400 h-3" style="width: 0"></div>
-            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
-                <span>{% trans 'Incorretas' %}</span>
-                <span id="wrong-text"></span>
-            </div>
-        </div>
-    </div>
+    {% include 'includes/base/progressbar.html' %}
 </div>
 <script>
     var order = {{ listen_order }}
 
-    htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
+        htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
 
     var total = order.length
 

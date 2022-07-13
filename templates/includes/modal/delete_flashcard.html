@@ -19,16 +19,16 @@
                 </button>
             </div>
             <div class="p-6 space-y-6">
-                <div class="text-lg">
+                <div class="text-lg dark:text-white">
                     {% trans 'Você tem certeza que deseja excluir esse cartão?' %}
                 </div>
                 <div class="flex space-x-6">
                     <button _="on click call close()" type="button"
-                            class="p-2 bg-yellow-400 rounded-lg text-white">
+                            class="p-2 bg-yellow-400 font-bold rounded-lg text-white">
                         {% trans 'Cancelar' %}
                     </button>
                     <button _="on click call deleteCard()" type="button"
-                            class="p-2 bg-red-700 rounded-lg text-white">
+                            class="p-2 bg-red-700 font-bold rounded-lg text-white">
                         {% trans 'Confirmar' %}
                     </button>
                 </div>
