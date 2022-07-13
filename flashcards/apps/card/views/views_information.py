@@ -6,7 +6,7 @@ from flashcards.apps.deck.models import Deck
 
 
 def information_view(request, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
+    deck = Deck.objects.filter(id=deck_id).prefetch_related('cards__word', 'creator').first()
 
     cards = deck.cards.all()
 

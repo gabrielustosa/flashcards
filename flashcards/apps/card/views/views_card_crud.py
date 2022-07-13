@@ -119,7 +119,7 @@ def add_card_view(request, deck_id):
 
 
 def edit_card_view(request, order, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
+    deck = Deck.objects.filter(id=deck_id).prefetch_related('creator').first()
 
     card = CardRelation.objects.filter(deck=deck, order=order).first().card
 

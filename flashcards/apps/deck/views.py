@@ -7,7 +7,7 @@ from flashcards.apps.deck.models import Deck
 
 
 def deck_view(request, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
+    deck = Deck.objects.filter(id=deck_id).prefetch_related('creator').first()
 
     context = {
         'deck': deck,

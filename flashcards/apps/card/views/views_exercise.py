@@ -93,7 +93,7 @@ def render_multiple_meaning_exercise(request, word_id, deck_id):
 
 
 def render_multiple_example(request, word_id, deck_id):
-    deck = Deck.objects.filter(id=deck_id).first()
+    deck = Deck.objects.prefetch_related('cards__word').filter(id=deck_id).first()
     word_object = Word.objects.filter(id=word_id).first()
 
     word_user_definitions = list(WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word_object))

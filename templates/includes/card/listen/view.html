@@ -76,7 +76,7 @@
         updateProgressBar('#remaining', order.length)
         updateProgressText('#remaining-text', order.length)
         if (order.length === 0) {
-            await delay(4000)
+            await delay(3000)
             htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
             return
         }

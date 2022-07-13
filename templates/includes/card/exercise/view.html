@@ -36,9 +36,9 @@
     var deck_id = "{{ deck.id }}"
     var exercises = JSON.parse(document.getElementById('exercise-list').textContent);
 
-    renderExercise(exercises[0])
-
     var total = exercises.length
+
+    renderExercise(exercises[0])
 
     var right_answer = 0
     var wrong_answer = 0
@@ -73,7 +73,7 @@
         updateProgressBar('#remaining', exercises.length)
         updateProgressText('#remaining-text', exercises.length)
         if (exercises.length === 0) {
-            await delay(4000)
+            await delay(3000)
             htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
             return
         }
@@ -96,7 +96,6 @@
                 htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${exercise_word}/${deck_id}`, '#exercise-content')
                 break
         }
-        exercises.shift()
     }
 
     function renderVeryfing(correct, message) {
