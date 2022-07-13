@@ -1,9 +1,9 @@
-from random import choice, shuffle, sample
+from random import choice, shuffle
 
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from flashcards.apps.card.models import Word, WordUserMeaning
+from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck
 from utils.util import sample_from_dict, shuffle_from_dict
 
@@ -28,7 +28,10 @@ def exercise_view(request, deck_id):
             if exercise_choice == 'TY' or exercise_choice == 'ME' and multi_choice_enabled:
                 run = False
             if exercise_choice == 'MS' and multi_choice_enabled:
-                for definition in word.definitions.all():
+                word_definitions = list(word.definitions.all()) + list(
+                    WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word)
+                )
+                for definition in word_definitions:
                     if definition.example:
                         if word.word.lower() in definition.example.lower():
                             run = False
@@ -93,7 +96,10 @@ def render_multiple_example(request, word_id, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
     word_object = Word.objects.filter(id=word_id).first()
 
-    examples = list(filter(None, [definition.example for definition in word_object.definitions.all()]))
+    word_user_definitions = list(WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word_object))
+
+    examples = list(filter(None, [definition.example for definition in word_object.definitions.all()])) + [
+        definition.example for definition in word_user_definitions]
 
     random_example = choice(examples).lower()
 

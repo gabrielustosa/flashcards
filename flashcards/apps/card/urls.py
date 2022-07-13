@@ -19,6 +19,8 @@ urlpatterns = [
     path('information/<int:deck_id>/', views_information.information_view, name='information'),
     path('search_word/<int:deck_id>/', views_information.search_word_view, name='search_word'),
     path('word_information/<int:creator_id>/<int:word_id>/', views_information.information_word_view, name='word_information'),
+    path('information/render/add/<int:word_id>/', views_information.render_add_information_view, name='render_add_information'),
+    path('information/add/<int:word_id>/', views_information.add_information_view, name='add_information'),
 
     path('listen/<int:deck_id>/', views_listen.listen_view, name='listen'),
     path('listen/word/<int:deck_id>/<int:order>/', views_listen.listen_word_view, name='listen_word'),

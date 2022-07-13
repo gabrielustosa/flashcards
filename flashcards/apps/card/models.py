@@ -64,3 +64,29 @@ class WordUserMeaning(models.Model):
 
     def get_meanings_list(self):
         return ', '.join(self.get_meanings())
+
+
+class WordUserDefinition(models.Model):
+    POS_TAG_CHOICES = (
+        ('Adjective', 'Adjective'),
+        ('Adverb', 'Adverb'),
+        ('Conjunction', 'Conjunction'),
+        ('Determiner', 'Determiner'),
+        ('Modal', 'Modal'),
+        ('Noun', 'Noun'),
+        ('Preposition', 'Preposition'),
+        ('Pronoun', 'Pronoun'),
+        ('Verb', 'Verb'),
+        ('Other', 'Other'),
+    )
+    word = models.ForeignKey(
+        Word,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    pos_tag = models.CharField(_('Pos Tag'), max_length=11, choices=POS_TAG_CHOICES)
+    definition = models.TextField(_('Definition'))
+    example = models.TextField(_('Example'), null=True)
