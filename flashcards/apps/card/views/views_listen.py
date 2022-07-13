@@ -4,14 +4,18 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from flashcards.apps.card.models import Word
+from flashcards.apps.card.views.views_card import card_view
 from flashcards.apps.deck.models import CardRelation, Deck
 
 
 def listen_view(request, deck_id):
     last_relation = CardRelation.objects.filter(deck__id=deck_id).order_by('order').last()
 
+    if not last_relation:
+        return card_view(request, 1, deck_id)
+
     listen_order = []
-    for i in range(1, last_relation.order):
+    for i in range(1, last_relation.order + 1):
         listen_order.append(i)
     shuffle(listen_order)
 
@@ -27,7 +31,7 @@ def listen_word_view(request, deck_id, order):
 
 
 def listen_verify_view(request, word_id):
-    answer = request.GET.get('answer').lower()
+    answer = request.GET.get('answer').strip().lower()
 
     word_object = Word.objects.filter(id=word_id).first()
 

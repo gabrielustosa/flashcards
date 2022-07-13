@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import views_card_crud, views_meaning, views_card, views_information, views_listen
+from .views import views_card_crud, views_meaning, views_card, views_information, views_listen, views_exercise
 
 app_name = 'card'
 
@@ -23,4 +23,10 @@ urlpatterns = [
     path('listen/<int:deck_id>/', views_listen.listen_view, name='listen'),
     path('listen/word/<int:deck_id>/<int:order>/', views_listen.listen_word_view, name='listen_word'),
     path('listen/verify_word/<int:word_id>/', views_listen.listen_verify_view, name='listen_verify'),
+
+    path('exercise/<int:deck_id>/', views_exercise.exercise_view, name='exercise'),
+    path('exercise/render/type/<int:word_id>/', views_exercise.render_type_exercise, name='render_type'),
+    path('exercise/verify/type/<int:word_id>/<int:deck_id>/', views_exercise.verify_typing, name='verify_type'),
+    path('exercise/render/multiple_meaning/<int:word_id>/<int:deck_id>/', views_exercise.render_multiple_meaning_exercise, name='render_multiple_meaning'),
+    path('exercise/render/multiple_example/<int:word_id>/<int:deck_id>/', views_exercise.render_multiple_example, name='render_multiple_example'),
 ]

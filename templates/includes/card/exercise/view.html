@@ -1,0 +1,157 @@
+{% load i18n %}
+
+<div class="grid grid-cols-3">
+    <div class="col-span-2 px-6">
+        <div id="exercise-content">
+        </div>
+    </div>
+    <div class="px-3 space-y-6 w-4/5 mx-auto ">
+        <h1 class="text-xl font-bold py-4">{% trans 'Informações' %}</h1>
+        <div class="bg-gray-200 h-3">
+            <div id="remaining" class="bg-sky-700 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Restantes' %}</span>
+                <span id="remaining-text"></span>
+            </div>
+        </div>
+        <div class="bg-gray-200 h-3">
+            <div id="right" class="bg-green-600 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Corretas' %}</span>
+                <span id="right-text"></span>
+            </div>
+        </div>
+        <div class="bg-gray-200 h-3">
+            <div id="wrong" class="bg-red-400 h-3" style="width: 0"></div>
+            <div class="flex justify-between text-sm text-gray-700 py-0.5 font-medium">
+                <span>{% trans 'Incorretas' %}</span>
+                <span id="wrong-text"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{{ exercises_list|json_script:'exercise-list' }}
+
+<script>
+    var deck_id = "{{ deck.id }}"
+    var exercises = JSON.parse(document.getElementById('exercise-list').textContent);
+
+    renderExercise(exercises[0])
+
+    var total = exercises.length
+
+    var right_answer = 0
+    var wrong_answer = 0
+
+    updateProgressBar('#remaining', exercises.length)
+    updateProgressText('#remaining-text', exercises.length)
+
+    for (let element_id of ['#right-text', '#wrong-text']) {
+        updateProgressText(element_id, 0)
+    }
+
+
+    function updateProgressBar(element_id, value) {
+        let progress_element = document.querySelector(element_id)
+
+        value = (value * 100) / total
+
+        progress_element.style.width = `${value}%`
+    }
+
+    function updateProgressText(element_id, value) {
+        let progress_element = document.querySelector(element_id)
+        progress_element.innerText = `${value}/${total}`
+    }
+
+    function delay(ms) {
+        return new Promise(res => setTimeout(res, ms));
+    }
+
+    async function passExercise() {
+        exercises.shift()
+        updateProgressBar('#remaining', exercises.length)
+        updateProgressText('#remaining-text', exercises.length)
+        if (exercises.length === 0) {
+            await delay(4000)
+            htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
+            return
+        }
+        renderExercise(exercises[0])
+    }
+
+    function renderExercise(exercise) {
+        let parts = exercise.split('-')
+        let exercise_type = parts[0]
+        let exercise_word = parts[1]
+        switch (exercise_type) {
+            case 'TY':
+                htmx.ajax('GET', `/card/exercise/render/type/${exercise_word}`, '#exercise-content')
+                break
+            case 'MS':
+                htmx.ajax('GET', `/card/exercise/render/multiple_example/${exercise_word}/${deck_id}`, '#exercise-content')
+
+                break
+            case 'ME':
+                htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${exercise_word}/${deck_id}`, '#exercise-content')
+                break
+        }
+        exercises.shift()
+    }
+
+    function renderVeryfing(correct, message) {
+        let answer_info = document.querySelector('#answer-info')
+        if (correct) {
+            answer_info.innerHTML = message
+            answer_info.classList.add('bg-green-400')
+            answer_info.classList.remove('hidden')
+            right_answer += 1
+            updateProgressBar('#right', right_answer)
+            updateProgressText('#right-text', right_answer)
+        } else {
+            answer_info.innerHTML = message
+            answer_info.classList.add('bg-red-400')
+            answer_info.classList.remove('hidden')
+            wrong_answer += 1
+            updateProgressBar('#wrong', wrong_answer)
+            updateProgressText('#wrong-text', wrong_answer)
+        }
+        setTimeout(() => {
+            answer_info.classList.add('hidden')
+            passExercise()
+        }, 3000)
+    }
+
+    function verifyTyping(word_id, answer) {
+        fetch(`/card/exercise/verify/type/${word_id}/${deck_id}?answer=${answer}`)
+            .then(response => response.json())
+            .then(data => {
+                let correct = data['correct']
+                let meanings = data['meanings'].join(', ')
+                if (correct) {
+                    let other_meanings = meanings.length > 0 ? ` Outro(s) significado(s): ${meanings}` : ''
+                    renderVeryfing(correct, `Parabéns, você acertou! ${other_meanings}`)
+                } else {
+                    renderVeryfing(correct, `Você errou! O(s) significado(s) eram:  ${meanings}`)
+                }
+            })
+    }
+
+    function verifyMultiple(word_id) {
+        let buttons = document.querySelectorAll('.answer-button')
+        buttons.forEach(button => {
+            button.disabled = true
+        })
+        let answer_input = document.querySelector('[name="right-answer"]').value.split('|')
+        let right_answer = answer_input[0]
+        let right_id = answer_input[1]
+        let correct = word_id === parseInt(right_id)
+        if (correct) {
+            renderVeryfing(correct, `Parabéns, você acertou!`)
+        } else {
+            renderVeryfing(correct, `Você errou! A resposta era: ${right_answer}`)
+        }
+    }
+
+
+</script>

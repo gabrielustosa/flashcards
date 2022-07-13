@@ -22,7 +22,9 @@
                         hx-target="#content">
                         <i class="bi bi-card-text pr-4"></i>{% trans 'Cartões' %}
                     </li>
-                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max">
+                    <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
+                        hx-get="{% url 'card:exercise' deck.id %}"
+                        hx-target="#content">
                         <i class="bi bi-question-octagon-fill pr-4"></i>{% trans 'Questões' %}
                     </li>
                     <li class="cursor-pointer hover:bg-gray-300 p-2 px-4 max-w-max"
