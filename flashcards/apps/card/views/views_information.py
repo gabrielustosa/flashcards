@@ -2,6 +2,7 @@ from django.forms import modelform_factory
 from django.shortcuts import render
 
 from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
+from flashcards.apps.core.decorators import deck_creator_required
 from flashcards.apps.deck.models import Deck
 
 
@@ -48,6 +49,7 @@ def information_word_view(request, creator_id, word_id):
     })
 
 
+@deck_creator_required()
 def render_add_information_view(request, word_id):
     form = modelform_factory(WordUserDefinition, fields=['pos_tag', 'definition', 'example'])
     word = Word.objects.filter(id=word_id).first()
@@ -58,6 +60,7 @@ def render_add_information_view(request, word_id):
     })
 
 
+@deck_creator_required()
 def add_information_view(request, word_id):
     word = Word.objects.filter(id=word_id).first()
 

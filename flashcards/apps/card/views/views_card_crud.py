@@ -4,6 +4,7 @@ from django.shortcuts import render
 from flashcards.apps.card.forms import CardForm
 from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
 from flashcards.apps.card.views.views_card import card_view
+from flashcards.apps.core.decorators import deck_creator_required
 from flashcards.apps.deck.models import CardRelation, Deck
 
 from utils.audio import get_word_phonetic
@@ -11,6 +12,7 @@ from utils.audio import get_word_phonetic
 from utils.translation import get_word_definitions, get_word_meanigs, get_text_translated
 
 
+@deck_creator_required()
 def card_remove_view(request, order, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
@@ -39,6 +41,7 @@ def card_remove_view(request, order, deck_id):
     return card_view(request, new_order, deck_id)
 
 
+@deck_creator_required()
 def add_card_view(request, deck_id):
     deck = Deck.objects.filter(id=deck_id).first()
 
@@ -118,6 +121,7 @@ def add_card_view(request, deck_id):
     return card_view(request, order, deck_id)
 
 
+@deck_creator_required()
 def edit_card_view(request, order, deck_id):
     deck = Deck.objects.filter(id=deck_id).prefetch_related('creator').first()
 

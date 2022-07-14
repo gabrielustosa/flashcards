@@ -1,8 +1,10 @@
 from django.shortcuts import render
 
 from flashcards.apps.card.models import WordUserMeaning
+from flashcards.apps.core.decorators import deck_creator_required
 
 
+@deck_creator_required()
 def remove_meaning_view(request, word_id):
     word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
@@ -22,6 +24,7 @@ def remove_meaning_view(request, word_id):
                   })
 
 
+@deck_creator_required()
 def add_meanning_view(request, word_id):
     word_meanings = WordUserMeaning.objects.filter(word__id=word_id, user=request.user).first()
 
