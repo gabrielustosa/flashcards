@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck
-from utils.util import sample_from_dict, shuffle_from_dict, escape
+from utils.util import shuffle_from_dict, escape
 
 
 def exercise_view(request, deck_id):
@@ -71,12 +71,12 @@ def render_multiple_meaning_exercise(request, word_id, deck_id):
 
     meanings = word_meaning.get_meanings_list()
 
-    deck_words = {card.id: card.word.word for card in deck.cards.all()}
+    choices = dict()
 
-    choices = sample_from_dict(deck_words, 3)
-
-    while word_object.word in choices.values():
-        choices = sample_from_dict(deck_words, 3)
+    while len(choices) < 3:
+        random_word_object = deck.cards.order_by('?')[:1][0].word
+        if random_word_object.id not in choices.keys() and random_word_object != word_object:
+            choices[random_word_object.id] = random_word_object.word
 
     choices[word_object.id] = word_object.word
 
@@ -112,6 +112,7 @@ def render_multiple_example(request, word_id, deck_id):
     choices[word_object.id] = word_object.word
 
     choices = shuffle_from_dict(choices)
+
     return render(request, 'includes/card/exercise/multiple_example.html', context={
         'example': random_example,
         'choices': choices,
