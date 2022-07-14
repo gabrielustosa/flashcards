@@ -2,7 +2,7 @@ from django.db.models import F, ExpressionWrapper, PositiveIntegerField
 from django.shortcuts import render
 
 from flashcards.apps.card.forms import CardForm
-from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning
+from flashcards.apps.card.models import WordMeaning, Word, WordDefinition, Card, WordUserMeaning, WordUserDefinition
 from flashcards.apps.card.views.views_card import card_view
 from flashcards.apps.core.decorators import deck_creator_required
 from flashcards.apps.deck.models import CardRelation, Deck
@@ -37,6 +37,7 @@ def card_remove_view(request, order, deck_id):
     )
 
     WordUserMeaning.objects.filter(user=deck.creator, word=card.word).delete()
+    WordUserDefinition.objects.filter(user=deck.creator, word=card.word).delete()
 
     return card_view(request, new_order, deck_id)
 
@@ -99,18 +100,30 @@ def add_card_view(request, deck_id):
                 pos_tag = result.get('partOfSpeech')
                 for definition_result in result.get('definitions'):
                     definition = definition_result.get('definition')
-                    example = None
-                    if definition_result.get('example'):
-                        example = definition_result.get('example')
+                    example = definition_result.get('example')
+                    if example:
+                        if word.lower() not in example.lower():
+                            example = None
                     WordDefinition.objects.create(
                         word=word_object,
-                        pos_tag=pos_tag,
+                        pos_tag=pos_tag.capitalize(),
                         definition=definition,
                         example=example
                     )
 
         word_meaning = WordMeaning.objects.create(word=word_object, for_language=user_langauge, meanings=meanings)
         WordUserMeaning.objects.create(word=word_object, user=request.user, meanings=word_meaning.meanings)
+
+    word_definitions = WordDefinition.objects.filter(word=word_object)
+
+    for word_definition in word_definitions.all():
+        WordUserDefinition.objects.create(
+            word=word_object,
+            user=request.user,
+            pos_tag=word_definition.pos_tag,
+            definition=word_definition.definition,
+            example=word_definition.example,
+        )
 
     card = Card.objects.create(word=word_object)
 

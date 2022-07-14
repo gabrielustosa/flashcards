@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck
-from utils.util import sample_from_dict, shuffle_from_dict
+from utils.util import sample_from_dict, shuffle_from_dict, escape
 
 
 def exercise_view(request, deck_id):
@@ -28,13 +28,10 @@ def exercise_view(request, deck_id):
             if exercise_choice == 'TY' or exercise_choice == 'ME' and multi_choice_enabled:
                 run = False
             if exercise_choice == 'MS' and multi_choice_enabled:
-                word_definitions = list(word.definitions.all()) + list(
-                    WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word)
-                )
+                word_definitions = WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word)
                 for definition in word_definitions:
                     if definition.example:
-                        if word.word.lower() in definition.example.lower():
-                            run = False
+                        run = False
             if not run:
                 result.append(f"{exercise_choice}-{word.id}")
 
@@ -96,38 +93,21 @@ def render_multiple_example(request, word_id, deck_id):
     deck = Deck.objects.prefetch_related('cards__word').filter(id=deck_id).first()
     word_object = Word.objects.filter(id=word_id).first()
 
-    word_user_definitions = list(WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word_object))
+    word_user_definitions = WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word_object)
 
-    examples = list(filter(None, [definition.example for definition in word_object.definitions.all()])) + [
-        definition.example for definition in word_user_definitions]
+    examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
-    random_example = choice(examples).lower()
+    random_example = choice(examples)
+    word = word_object.word
 
-    word = word_object.word.lower()
+    random_example = escape(word, random_example)
 
-    while word not in random_example:
-        random_example = choice(examples).lower()
+    choices = dict()
 
-    if ' ' in word:  # phrasal verbs examples
-        word_parts = word.split(' ')
-        example_obfuscated = ''
-        for example_word in random_example.replace('.', '').split(' '):
-            if example_word in word_parts:
-                example_word = ''.join(['_' for n in range(len(example_word))])
-            example_obfuscated += example_word
-            example_obfuscated += ' '
-        random_example = example_obfuscated
-    else:
-        random_example = random_example.replace(word, ''.join(['_' for n in range(len(word))]))
-
-    random_example = random_example.capitalize()
-
-    deck_words = {card.id: card.word.word for card in deck.cards.all()}
-
-    choices = sample_from_dict(deck_words, 3)
-
-    while word_object.word in choices.values():
-        choices = sample_from_dict(deck_words, 3)
+    while len(choices) < 3:
+        random_word_object = deck.cards.order_by('?')[:1][0].word
+        if random_word_object.id not in choices.keys() and random_word_object != word_object:
+            choices[random_word_object.id] = random_word_object.word
 
     choices[word_object.id] = word_object.word
 

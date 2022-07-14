@@ -87,6 +87,6 @@ class WordUserDefinition(models.Model):
         User,
         on_delete=models.CASCADE
     )
-    pos_tag = models.CharField(_('Pos Tag'), max_length=11, choices=POS_TAG_CHOICES)
+    pos_tag = models.CharField(_('Pos Tag'), max_length=15, choices=POS_TAG_CHOICES)
     definition = models.TextField(_('Definition'))
     example = models.TextField(_('Example'), null=True)

@@ -36,32 +36,32 @@ def search_word_view(request, deck_id):
 def information_word_view(request, creator_id, word_id):
     word = Word.objects.filter(id=word_id).first()
 
-    definitions = word.definitions.all()
     user_definitions = WordUserDefinition.objects.filter(user__id=creator_id, word=word).all()
 
     meaning = WordUserMeaning.objects.filter(word=word, user__id=creator_id).first()
 
     return render(request, 'includes/card/information/word_information.html', context={
         'word': word,
-        'word_definitions': list(definitions) + list(user_definitions),
+        'word_definitions': user_definitions,
         'word_meanings': meaning,
         'creator_id': creator_id,
     })
 
 
 @deck_creator_required()
-def render_add_information_view(request, word_id):
+def render_add_definition_view(request, word_id, creator_id):
     form = modelform_factory(WordUserDefinition, fields=['pos_tag', 'definition', 'example'])
     word = Word.objects.filter(id=word_id).first()
 
-    return render(request, 'includes/card/information/add_information.html', context={
+    return render(request, 'includes/card/information/definition/add_definition.html', context={
         'word': word,
-        'form': form
+        'form': form,
+        'creator_id': creator_id,
     })
 
 
 @deck_creator_required()
-def add_information_view(request, word_id):
+def add_definition_view(request, word_id, creator_id):
     word = Word.objects.filter(id=word_id).first()
 
     pos_tag = request.POST.get('pos_tag')
@@ -76,4 +76,55 @@ def add_information_view(request, word_id):
         user=request.user
     )
 
-    return information_word_view(request, request.user.id, word.id)
+    return information_word_view(request, creator_id, word.id)
+
+
+@deck_creator_required()
+def render_edit_information_view(request, word_id, creator_id):
+    word = Word.objects.filter(id=word_id).first()
+
+    user_definitions = WordUserDefinition.objects.filter(user__id=creator_id, word=word).all()
+
+    return render(request, 'includes/card/information/edit_information.html', context={
+        'word': word,
+        'word_definitions': user_definitions,
+        'creator_id': creator_id,
+    })
+
+
+@deck_creator_required()
+def remove_definition_view(request, word_id, creator_id, definition_id):
+    WordUserDefinition.objects.filter(id=definition_id).delete()
+    return render_edit_information_view(request, word_id, creator_id)
+
+
+@deck_creator_required()
+def render_edit_definition_view(request, word_id, creator_id, definition_id):
+    word = Word.objects.filter(id=word_id).first()
+    word_definition = WordUserDefinition.objects.filter(id=definition_id).first()
+
+    form = modelform_factory(WordUserDefinition, fields=['pos_tag', 'definition', 'example'])(instance=word_definition)
+
+    return render(request, 'includes/card/information/definition/edit_definition.html', context={
+        'word': word,
+        'word_definition_id': word_definition.id,
+        'creator_id': creator_id,
+        'form': form,
+    })
+
+
+@deck_creator_required()
+def edit_definition_view(request, word_id, creator_id, definition_id):
+    word_definition = WordUserDefinition.objects.filter(id=definition_id).first()
+
+    pos_tag = request.POST.get('pos_tag')
+    definition = request.POST.get('definition')
+    example = request.POST.get('example')
+
+    word_definition.pos_tag = pos_tag
+    word_definition.definition = definition
+    word_definition.example = example
+
+    word_definition.save()
+
+    return render_edit_information_view(request, word_id, creator_id)

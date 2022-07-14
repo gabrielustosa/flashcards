@@ -9,14 +9,18 @@
             {% trans 'Pronúncia' %}
         </div>
     </div>
-    <div>
-        {% if user.id == creator_id %}
+    {% if user.id == creator_id %}
+        <div class="space-x-3">
+            <button class="bg-yellow-300 p-2 rounded-lg text-white"
+                    hx-get="{% url 'card:render_edit_information' word.id creator_id %}" hx-target="#content">
+                <i class="bi bi-pencil-fill"></i> Editar
+            </button>
             <button class="bg-green-500 p-2 rounded-lg text-white"
-                    hx-get="{% url 'card:render_add_information' word.id %}" hx-target="#content">
+                    hx-get="{% url 'card:render_add_definition' word.id creator_id %}" hx-target="#content">
                 <i class="bi bi-plus-lg"></i> Adicionar
             </button>
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 </div>
 <audio id="audio" src="{{ word.audio_phonetic }}"></audio>
 <div class="py-4 space-y-3 dark:text-white">
@@ -38,7 +42,7 @@
         <h1 class="text-xl font-bold">{% trans 'Morfologia' %}</h1>
         {% for word_definition in word_definitions %}
             <div class="py-3 space-y-1">
-                <h1 class="text-lg font-bold">{{ word_definition.pos_tag|capfirst }}</h1>
+                <h1 class="text-lg font-bold">{{ word_definition.pos_tag }}</h1>
                 <div>
                     {{ word_definition.definition }}
                 </div>

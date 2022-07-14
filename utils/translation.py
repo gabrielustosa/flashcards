@@ -36,6 +36,7 @@ def get_word_definitions(word):
                 if meaning.get('synonyms'):
                     synonyms = synonyms.union(meaning.get('synonyms'))
             result['meaning'] = result_meaning
+
             result['synonyms'] = '|'.join(synonyms)
     return result
 
