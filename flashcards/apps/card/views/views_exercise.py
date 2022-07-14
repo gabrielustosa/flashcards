@@ -1,5 +1,6 @@
 from random import choice, shuffle
 
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -28,10 +29,9 @@ def exercise_view(request, deck_id):
             if exercise_choice == 'TY' or exercise_choice == 'ME' and multi_choice_enabled:
                 run = False
             if exercise_choice == 'MS' and multi_choice_enabled:
-                word_definitions = WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word)
-                for definition in word_definitions:
-                    if definition.example:
-                        run = False
+                query = WordUserDefinition.objects.filter(user=deck.creator, word=word, example__isnull=False)
+                if query.exists():
+                    run = False
             if not run:
                 result.append(f"{exercise_choice}-{word.id}")
 
@@ -73,12 +73,9 @@ def render_multiple_meaning_exercise(request, word_id, deck_id):
 
     choices = dict()
 
-    while len(choices) < 3:
-        random_word_object = deck.cards.order_by('?')[:1][0].word
-        if random_word_object.id not in choices.keys() and random_word_object != word_object:
-            choices[random_word_object.id] = random_word_object.word
-
     choices[word_object.id] = word_object.word
+
+    [choices.update({word.id: word.word}) for word in deck.cards.filter(~Q(word=word_object)).order_by('?')[:3]]
 
     choices = shuffle_from_dict(choices)
 
@@ -93,7 +90,7 @@ def render_multiple_example(request, word_id, deck_id):
     deck = Deck.objects.prefetch_related('cards__word').filter(id=deck_id).first()
     word_object = Word.objects.filter(id=word_id).first()
 
-    word_user_definitions = WordUserDefinition.objects.filter(user__id=deck.creator.id, word=word_object)
+    word_user_definitions = WordUserDefinition.objects.filter(user=deck.creator, word=word_object)
 
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
@@ -104,12 +101,9 @@ def render_multiple_example(request, word_id, deck_id):
 
     choices = dict()
 
-    while len(choices) < 3:
-        random_word_object = deck.cards.order_by('?')[:1][0].word
-        if random_word_object.id not in choices.keys() and random_word_object != word_object:
-            choices[random_word_object.id] = random_word_object.word
-
     choices[word_object.id] = word_object.word
+
+    [choices.update({word.id: word.word}) for word in deck.cards.filter(~Q(word=word_object)).order_by('?')[:3]]
 
     choices = shuffle_from_dict(choices)
 
