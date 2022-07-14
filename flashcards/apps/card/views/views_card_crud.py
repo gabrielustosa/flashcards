@@ -135,5 +135,6 @@ def edit_card_view(request, order, deck_id):
                   context={
                       'word': card.word,
                       'word_meanings': word_meanings,
-                      'edit_form': edit_form
+                      'edit_form': edit_form,
+                      'deck_id': deck.id,
                   })

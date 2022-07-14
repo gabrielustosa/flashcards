@@ -2,7 +2,7 @@
     {% if meaning %}
         <span class="p-1 dark:text-white">
             <i class="bi bi-trash3-fill text-red-500 dark:text-red-700 cursor-pointer"
-               hx-get="{% url 'card:remove_meaning' word.id %}?value={{ forloop.counter0 }}"
+               hx-get="{% url 'card:remove_meaning' word.id deck_id %}?value={{ forloop.counter0 }}"
                hx-target="#meaning-list">
             </i>
             {{ meaning }}

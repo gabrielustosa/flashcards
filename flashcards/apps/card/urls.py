@@ -13,8 +13,8 @@ urlpatterns = [
     path('add/<int:deck_id>/', views_card_crud.add_card_view, name='add'),
     path('edit/<int:order>/<int:deck_id>/', views_card_crud.edit_card_view, name='edit'),
 
-    path('remove_meaning/<int:word_id>/', views_meaning.remove_meaning_view, name='remove_meaning'),
-    path('add_meaning/<int:word_id>/', views_meaning.add_meanning_view, name='add_meaning'),
+    path('remove_meaning/<int:word_id>/<int:deck_id>/', views_meaning.remove_meaning_view, name='remove_meaning'),
+    path('add_meaning/<int:word_id>/<int:deck_id>/', views_meaning.add_meanning_view, name='add_meaning'),
 
     path('information/<int:deck_id>/', views_information.information_view, name='information'),
     path('search_word/<int:deck_id>/', views_information.search_word_view, name='search_word'),
