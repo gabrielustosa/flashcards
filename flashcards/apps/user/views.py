@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
@@ -19,3 +20,10 @@ class UserRegisterView(CreateView):
         )
         login(request=self.request, user=user)
         return result
+
+
+def add_right_answer(request):
+    user = request.user
+    user.right_answers += 1
+    user.save()
+    return JsonResponse({'status': 'ok'})

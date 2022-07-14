@@ -44,6 +44,7 @@ def information_word_view(request, creator_id, word_id):
         'word': word,
         'word_definitions': list(definitions) + list(user_definitions),
         'word_meanings': meaning,
+        'creator_id': creator_id,
     })
 
 

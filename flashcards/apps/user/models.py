@@ -45,6 +45,7 @@ class User(AbstractUser):
         choices=settings.LANGUAGES,
         max_length=7
     )
+    right_answers = models.PositiveIntegerField(default=0)
     objects = UserManager()
 
     USERNAME_FIELD = 'email'

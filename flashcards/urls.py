@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as views_login
 
-from flashcards.apps.user.views import UserRegisterView
+from flashcards.apps.user.views import UserRegisterView, add_right_answer
 from flashcards.apps.core.views import HomeView
 
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='register'),
     path('login/', views_login.LoginView.as_view(), name='login'),
     path('logout/', views_login.LogoutView.as_view(), name='logout'),
+    path('add_right_answer/', add_right_answer, name='add_right_answer'),
 
     path('deck/', include('flashcards.apps.deck.urls')),
     path('card/', include('flashcards.apps.card.urls')),

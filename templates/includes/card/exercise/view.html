@@ -84,6 +84,8 @@
             right_answer += 1
             updateProgressBar('#right', right_answer)
             updateProgressText('#right-text', right_answer)
+            fetch('{% url "add_right_answer" %}')
+                .then(response => response.json())
         } else {
             answer_info.innerHTML = message
             answer_info.classList.add('bg-red-400')

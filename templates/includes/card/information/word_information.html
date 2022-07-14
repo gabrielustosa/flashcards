@@ -3,16 +3,19 @@
 <div class="flex justify-between my-6 dark:text-white">
     <div class="space-y-3 dark:text-white">
         <h1 class="text-3xl font-bold">{% trans 'Definições da palavra ' %} "{{ word }}"</h1>
-        <div onclick="document.getElementById('audio').play()" class="cursor-pointer text-xl text-gray-700 dark:text-white">
+        <div onclick="document.getElementById('audio').play()"
+             class="cursor-pointer text-xl text-gray-700 dark:text-white">
             <i class="bi bi-volume-up-fill pr-2"></i>
             {% trans 'Pronúncia' %}
         </div>
     </div>
     <div>
-        <button class="bg-green-500 p-2 rounded-lg text-white"
-                hx-get="{% url 'card:render_add_information' word.id %}" hx-target="#content">
-            <i class="bi bi-plus-lg"></i> Adicionar
-        </button>
+        {% if user.id == creator_id %}
+            <button class="bg-green-500 p-2 rounded-lg text-white"
+                    hx-get="{% url 'card:render_add_information' word.id %}" hx-target="#content">
+                <i class="bi bi-plus-lg"></i> Adicionar
+            </button>
+        {% endif %}
     </div>
 </div>
 <audio id="audio" src="{{ word.audio_phonetic }}"></audio>
