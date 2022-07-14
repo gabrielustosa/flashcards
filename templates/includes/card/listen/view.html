@@ -57,7 +57,9 @@
             htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
             return
         }
-        htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
+        if (document.querySelector('#listen-content') != null) {
+            htmx.ajax('GET', `/card/listen/word/{{ deck.id }}/${order[0]}/`, '#listen-content')
+        }
     }
 
     function verifyWord(word_id, answer) {

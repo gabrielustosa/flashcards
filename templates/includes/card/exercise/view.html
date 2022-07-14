@@ -61,17 +61,18 @@
         let parts = exercise.split('-')
         let exercise_type = parts[0]
         let exercise_word = parts[1]
-        switch (exercise_type) {
-            case 'TY':
-                htmx.ajax('GET', `/card/exercise/render/type/${exercise_word}`, '#exercise-content')
-                break
-            case 'MS':
-                htmx.ajax('GET', `/card/exercise/render/multiple_example/${exercise_word}/${deck_id}`, '#exercise-content')
-
-                break
-            case 'ME':
-                htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${exercise_word}/${deck_id}`, '#exercise-content')
-                break
+        if (document.querySelector('#exercise-content') != null) {
+            switch (exercise_type) {
+                case 'TY':
+                    htmx.ajax('GET', `/card/exercise/render/type/${exercise_word}`, '#exercise-content')
+                    break
+                case 'MS':
+                    htmx.ajax('GET', `/card/exercise/render/multiple_example/${exercise_word}/${deck_id}`, '#exercise-content')
+                    break
+                case 'ME':
+                    htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${exercise_word}/${deck_id}`, '#exercise-content')
+                    break
+            }
         }
     }
 
