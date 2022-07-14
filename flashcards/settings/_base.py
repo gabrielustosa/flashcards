@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     # 3rd apps
     'tailwind',
     'theme',
-    'django_browser_reload',
+    # 'django_browser_reload',
     'crispy_forms',
     # 'debug_toolbar',
     'crispy_tailwind',
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django_browser_reload.middleware.BrowserReloadMiddleware',
+    # 'django_browser_reload.middleware.BrowserReloadMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
