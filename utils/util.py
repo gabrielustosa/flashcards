@@ -1,5 +1,6 @@
 import random
 import string
+import difflib
 
 
 def shuffle_from_dict(d):
@@ -29,4 +30,13 @@ def escape(word, sentence):
                 new_word = replaced_string
         new_sentence += new_word
         new_sentence += ' '
+
+    close_matches = difflib.get_close_matches(word, new_sentence.split(' '))
+    if close_matches:
+        for match in close_matches:
+            match_str = str(match).lower()
+            if match_str.startswith(word):
+                replaced_string = ''.join(['_' for n in range(len(match_str))])
+                new_sentence = new_sentence.replace(match_str, replaced_string)
+
     return new_sentence
