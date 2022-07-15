@@ -31,12 +31,24 @@ def escape(word, sentence):
         new_sentence += new_word
         new_sentence += ' '
 
-    close_matches = difflib.get_close_matches(word, new_sentence.split(' '))
+    if isinstance(word, list):
+        close_matches = []
+        for word_part in word:
+            matches = difflib.get_close_matches(word_part, new_sentence.split(' '))
+            close_matches.extend(matches)
+    else:
+        close_matches = difflib.get_close_matches(word, new_sentence.split(' '))
     if close_matches:
         for match in close_matches:
             match_str = str(match).lower()
-            if match_str.startswith(word):
-                replaced_string = ''.join(['_' for n in range(len(match_str))])
-                new_sentence = new_sentence.replace(match_str, replaced_string)
+            if isinstance(word, list):
+                for word_part in word:
+                    if match_str.startswith(word_part):
+                        replaced_string = ''.join(['_' for n in range(len(match_str))])
+                        new_sentence = new_sentence.replace(match_str, replaced_string)
+            else:
+                if match_str.startswith(word):
+                    replaced_string = ''.join(['_' for n in range(len(match_str))])
+                    new_sentence = new_sentence.replace(match_str, replaced_string)
 
     return new_sentence
