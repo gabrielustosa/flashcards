@@ -26,7 +26,7 @@ def escape(word, sentence):
 
     close_matches = []
     for word_part in word:
-        matches = difflib.get_close_matches(word_part, new_sentence.split(' '))
+        matches = difflib.get_close_matches(word_part, new_sentence.split(' '), cutoff=0.5)
         close_matches.extend(matches)
     if close_matches:
         for match in close_matches:
