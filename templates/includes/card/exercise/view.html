@@ -51,8 +51,10 @@
         updateProgressText('#remaining-text', exercises.length)
         if (exercises.length === 0) {
             await delay(3000)
-            htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
-            return
+            if (document.querySelector('#exercise-content') != null) {
+                htmx.ajax('GET', '{% url "card:view" 1 deck.id %}', '#content')
+                return
+            }
         }
         renderExercise(exercises[0])
     }

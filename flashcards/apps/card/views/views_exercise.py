@@ -20,16 +20,14 @@ def exercise_view(request, deck_id):
 
     multi_choice_enabled = deck.cards.count() >= 4
 
+    if not multi_choice_enabled:
+        exercises_type = ['TY']
+
     for card in deck.cards.all():
         word = card.word
 
-        run = True
-        while run:
-            exercise_choice = choice(exercises_type)
-            if exercise_choice == 'TY' or exercise_choice in ['MS', 'ME'] and multi_choice_enabled:
-                run = False
-            if not run:
-                result.append(f"{exercise_choice}-{word.id}")
+        exercise_choice = choice(exercises_type)
+        result.append(f"{exercise_choice}-{word.id}")
 
     shuffle(result)
 
@@ -91,6 +89,7 @@ def render_multiple_example(request, word_id, deck_id):
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
     if not examples:
+        print('pulo um')
         return render_type_exercise(request, word_id)
 
     random_example = choice(examples)
