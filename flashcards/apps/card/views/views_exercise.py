@@ -1,6 +1,6 @@
 from random import choice, shuffle
 
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -13,12 +13,12 @@ def exercise_view(request, deck_id):
     # digitar significado TY
     # multipla escolha com signifcado MS
     # multipla escolha com exemplo ME
-    deck = Deck.objects.filter(id=deck_id).first()
+    deck = Deck.objects.filter(id=deck_id).prefetch_related('cards').annotate(total_cards=Count('cards')).first()
 
     exercises_type = ['TY', 'MS', 'ME']
     result = []
 
-    multi_choice_enabled = deck.cards.count() >= 4
+    multi_choice_enabled = deck.total_cards >= 4
 
     if not multi_choice_enabled:
         exercises_type = ['TY']
@@ -89,7 +89,6 @@ def render_multiple_example(request, word_id, deck_id):
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
     if not examples:
-        print('pulo um')
         return render_type_exercise(request, word_id)
 
     random_example = choice(examples)
