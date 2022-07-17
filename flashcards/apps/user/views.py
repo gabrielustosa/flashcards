@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
@@ -13,7 +14,9 @@ class UserRegisterView(CreateView):
     success_url = reverse_lazy('home')
 
     def dispatch(self, request, *args, **kwargs):
-        raise PermissionDenied()
+        if not settings.ALLOW_REGISTRATION:
+            raise PermissionDenied()
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         result = super().form_valid(form)

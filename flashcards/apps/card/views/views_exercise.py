@@ -15,7 +15,7 @@ def exercise_view(request, deck_id):
     # multipla escolha com exemplo ME
     deck = Deck.objects.filter(id=deck_id).first()
 
-    exercises = ['TY', 'MS', 'ME']
+    exercises_type = ['TY', 'MS', 'ME']
     result = []
 
     multi_choice_enabled = deck.cards.count() >= 4
@@ -25,13 +25,9 @@ def exercise_view(request, deck_id):
 
         run = True
         while run:
-            exercise_choice = choice(exercises)
-            if exercise_choice == 'TY' or exercise_choice == 'ME' and multi_choice_enabled:
+            exercise_choice = choice(exercises_type)
+            if exercise_choice == 'TY' or exercise_choice in ['MS', 'ME'] and multi_choice_enabled:
                 run = False
-            if exercise_choice == 'MS' and multi_choice_enabled:
-                query = WordUserDefinition.objects.filter(user=deck.creator, word=word, example__isnull=False)
-                if query.exists():
-                    run = False
             if not run:
                 result.append(f"{exercise_choice}-{word.id}")
 
@@ -93,6 +89,9 @@ def render_multiple_example(request, word_id, deck_id):
     word_user_definitions = WordUserDefinition.objects.filter(user=deck.creator, word=word_object)
 
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
+
+    if not examples:
+        return render_type_exercise(request, word_id)
 
     random_example = choice(examples)
     word = word_object.word

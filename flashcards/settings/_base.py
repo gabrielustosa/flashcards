@@ -32,6 +32,7 @@ ALLOWED_HOSTS = parse_comma_sep_str_to_list(
     get_env_variable('ALLOWED_HOSTS')
 )
 
+ALLOW_REGISTRATION = True
 # Application definition
 
 INSTALLED_APPS = [

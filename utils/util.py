@@ -19,7 +19,7 @@ def escape(word, sentence):
         word_sentence = word_sentence.translate(str.maketrans('', '', string.punctuation))
         for word_part in word:
             if word_part == word_sentence:
-                replaced_string = ''.join(['_' for n in range(len(word_part))])
+                replaced_string = ''.join(['_' for _ in range(len(word_part))])
                 new_word = replaced_string
         new_sentence += new_word
         new_sentence += ' '
@@ -33,7 +33,7 @@ def escape(word, sentence):
             match_str = str(match).lower()
             for word_part in word:
                 if match_str.startswith(word_part):
-                    replaced_string = ''.join(['_' for n in range(len(match_str))])
-                    new_sentence = new_sentence.replace(match_str, replaced_string)
+                    replaced_string = ''.join(['_' for _ in range(len(match_str))])
+                    new_sentence = new_sentence.replace(str(match), replaced_string)
 
     return new_sentence
