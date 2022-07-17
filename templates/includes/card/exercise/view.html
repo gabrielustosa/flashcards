@@ -66,13 +66,13 @@
         if (document.querySelector('#exercise-content') != null) {
             switch (exercise_type) {
                 case 'TY':
-                    htmx.ajax('GET', `/card/exercise/render/type/${exercise_word}`, '#exercise-content')
+                    htmx.ajax('GET', `/card/exercise/render/type/${deck_id}/${exercise_word}/`, '#exercise-content')
                     break
                 case 'MS':
-                    htmx.ajax('GET', `/card/exercise/render/multiple_example/${exercise_word}/${deck_id}`, '#exercise-content')
+                    htmx.ajax('GET', `/card/exercise/render/multiple_example/${deck_id}/${exercise_word}/`, '#exercise-content')
                     break
                 case 'ME':
-                    htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${exercise_word}/${deck_id}`, '#exercise-content')
+                    htmx.ajax('GET', `/card/exercise/render/multiple_meaning/${deck_id}/${exercise_word}/`, '#exercise-content')
                     break
             }
         }

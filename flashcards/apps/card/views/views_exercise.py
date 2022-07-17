@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
-from flashcards.apps.deck.models import Deck
+from flashcards.apps.deck.models import Deck, CardRelation
 from utils.util import shuffle_from_dict, escape
 
 
@@ -13,7 +13,8 @@ def exercise_view(request, deck_id):
     # digitar significado TY
     # multipla escolha com signifcado MS
     # multipla escolha com exemplo ME
-    deck = Deck.objects.filter(id=deck_id).prefetch_related('cards').annotate(total_cards=Count('cards')).first()
+    deck = Deck.objects.filter(id=deck_id).annotate(total_cards=Count('cards')).first()
+    last_relation = CardRelation.objects.filter(deck=deck).order_by('order').last()
 
     exercises_type = ['TY', 'MS', 'ME']
     result = []
@@ -23,21 +24,19 @@ def exercise_view(request, deck_id):
     if not multi_choice_enabled:
         exercises_type = ['TY']
 
-    for card in deck.cards.all():
-        word = card.word
-
+    for order in range(1, last_relation.order + 1):
         exercise_choice = choice(exercises_type)
-        result.append(f"{exercise_choice}-{word.id}")
+        result.append(f"{exercise_choice}-{order}")
 
     shuffle(result)
 
     return render(request, 'includes/card/exercise/view.html', context={'exercises_list': result, 'deck': deck})
 
 
-def render_type_exercise(request, word_id):
-    word_object = Word.objects.filter(id=word_id).first()
+def render_type_exercise(request, deck_id, order):
+    card = CardRelation.objects.filter(deck__id=deck_id, order=order).first().card
 
-    return render(request, 'includes/card/exercise/type.html', context={'word': word_object})
+    return render(request, 'includes/card/exercise/type.html', context={'word': card.word})
 
 
 def verify_typing(request, word_id, deck_id):
@@ -57,11 +56,11 @@ def verify_typing(request, word_id, deck_id):
     return JsonResponse({'correct': correct, 'meanings': meanings})
 
 
-def render_multiple_meaning_exercise(request, word_id, deck_id):
+def render_multiple_meaning_exercise(request, deck_id, order):
     deck = Deck.objects.filter(id=deck_id).first()
-    word_object = Word.objects.filter(id=word_id).first()
+    word_object = CardRelation.objects.filter(deck__id=deck_id, order=order).first().card.word
 
-    word_meaning = WordUserMeaning.objects.filter(word__id=word_id, user=deck.creator).first()
+    word_meaning = WordUserMeaning.objects.filter(word=word_object, user=deck.creator).first()
 
     meanings = word_meaning.get_meanings_list()
 
@@ -80,16 +79,16 @@ def render_multiple_meaning_exercise(request, word_id, deck_id):
     })
 
 
-def render_multiple_example(request, word_id, deck_id):
+def render_multiple_example(request, deck_id, order):
     deck = Deck.objects.prefetch_related('cards__word').filter(id=deck_id).first()
-    word_object = Word.objects.filter(id=word_id).first()
+    word_object = CardRelation.objects.filter(deck__id=deck_id, order=order).first().card.word
 
     word_user_definitions = WordUserDefinition.objects.filter(user=deck.creator, word=word_object)
 
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
     if not examples:
-        return render_type_exercise(request, word_id)
+        return render_type_exercise(request, word_object.id)
 
     random_example = choice(examples)
     word = word_object.word
