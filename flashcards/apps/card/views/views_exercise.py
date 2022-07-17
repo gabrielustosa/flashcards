@@ -4,7 +4,7 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from flashcards.apps.card.models import Word, WordUserMeaning, WordUserDefinition
+from flashcards.apps.card.models import WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck, CardRelation
 from utils.util import shuffle_from_dict, escape
 
