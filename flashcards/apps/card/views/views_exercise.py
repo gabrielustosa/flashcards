@@ -1,12 +1,12 @@
-from random import choice, shuffle
+from random import choice, shuffle, randint
 
-from django.db.models import Q, Count
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from flashcards.apps.card.models import WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck, CardRelation
-from utils.util import shuffle_from_dict, escape
+from utils.util import shuffle_from_dict, escape, get_random_objects
 
 
 def exercise_view(request, deck_id):
@@ -64,11 +64,9 @@ def render_multiple_meaning_exercise(request, deck_id, order):
 
     meanings = word_meaning.get_meanings_list()
 
-    choices = dict()
+    choices = {word_object.id: word_object.word}
 
-    choices[word_object.id] = word_object.word
-
-    [choices.update({word.id: word.word}) for word in deck.cards.filter(~Q(word=word_object)).order_by('?')[:3]]
+    [choices.update({word.id: word.word}) for word in get_random_objects(deck.cards, not_equal=word_object.id, quantity=3)]
 
     choices = shuffle_from_dict(choices)
 
@@ -88,18 +86,19 @@ def render_multiple_example(request, deck_id, order):
     examples = list(filter(None, [definition.example for definition in word_user_definitions]))
 
     if not examples:
-        return render_type_exercise(request, word_object.id)
+        random_choice = randint(0, 1)
+        if random_choice == 1:
+            return render_multiple_meaning_exercise(request, deck_id, order)
+        return render_type_exercise(request, deck_id, order)
 
     random_example = choice(examples)
     word = word_object.word
 
     random_example = escape(word, random_example)
 
-    choices = dict()
+    choices = {word_object.id: word_object.word}
 
-    choices[word_object.id] = word_object.word
-
-    [choices.update({word.id: word.word}) for word in deck.cards.filter(~Q(word=word_object)).order_by('?')[:3]]
+    [choices.update({word.id: word.word}) for word in get_random_objects(deck.cards, not_equal=word_object.id, quantity=3)]
 
     choices = shuffle_from_dict(choices)
 

@@ -1,11 +1,11 @@
-import random
 import string
 import difflib
+from random import choice, shuffle
 
 
 def shuffle_from_dict(d):
     dict_list = list(d.items())
-    random.shuffle(dict_list)
+    shuffle(dict_list)
     return dict(dict_list)
 
 
@@ -37,3 +37,16 @@ def escape(word, sentence):
                     new_sentence = new_sentence.replace(str(match), replaced_string)
 
     return new_sentence
+
+
+def get_random_objects(query, not_equal, quantity=1):
+    pks = query.values_list('pk', flat=True)
+
+    list_ids = []
+    for _ in range(quantity):
+        random_id = choice(pks)
+        while random_id in list_ids or random_id == not_equal:
+            random_id = choice(pks)
+        list_ids.append(random_id)
+
+    return query.filter(id__in=list_ids)
