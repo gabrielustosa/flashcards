@@ -48,12 +48,13 @@ def add_card_view(request, deck_id):
 
     word = request.POST.get('word').strip().capitalize()
 
-    user_langauge = request.user.language
+    if deck.cards.filter(word__word=word).exists():
+        order = CardRelation.objects.filter(deck=deck, card__word__word=word).first().order
+        return card_view(request, order, deck_id)
 
     word_query = Word.objects.filter(word=word)
 
-    if deck.cards.filter(word__word=word).exists():
-        return card_view(request, 1, deck_id)
+    user_langauge = request.user.language
 
     if word_query.exists():
         word_object = word_query.first()
