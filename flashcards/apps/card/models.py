@@ -11,7 +11,7 @@ class Word(UrlBase):
     synonyms = models.TextField(_('Synonyms'), null=True)
 
     def get_synonyms(self):
-        return [synonym.capitalize() for synonym in self.synonyms.split('|')]
+        return [synonym.capitalize() for synonym in self.synonyms.split('|') if synonym]
 
     def get_synonyms_list(self):
         return ', '.join(self.get_synonyms())
@@ -60,7 +60,7 @@ class WordUserMeaning(models.Model):
     meanings = models.TextField(_('Meanings'))
 
     def get_meanings(self):
-        return [meaning.capitalize() for meaning in self.meanings.split('|')]
+        return [meaning.capitalize() for meaning in self.meanings.split('|') if meaning]
 
     def get_meanings_list(self):
         return ', '.join(self.get_meanings())
