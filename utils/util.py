@@ -2,6 +2,8 @@ import string
 import difflib
 from random import choice, shuffle
 
+from django.db.models import Q
+
 
 def shuffle_from_dict(d):
     dict_list = list(d.items())
@@ -39,14 +41,13 @@ def escape(word, sentence):
     return new_sentence
 
 
-def get_random_objects(query, not_equal, quantity=1):
-    pks = query.values_list('pk', flat=True)
+def get_random_cards(query, not_equal=0, quantity=1):
+    pks = query.filter(~Q(word__id=not_equal)).values_list('word__id', flat=True)
 
     list_ids = []
     for _ in range(quantity):
         random_id = choice(pks)
-        while random_id in list_ids or random_id == not_equal:
+        while random_id in list_ids:
             random_id = choice(pks)
         list_ids.append(random_id)
-
-    return query.filter(id__in=list_ids)
+    return query.filter(word__id__in=list_ids)

@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from flashcards.apps.card.models import WordUserMeaning, WordUserDefinition
 from flashcards.apps.deck.models import Deck, CardRelation
-from utils.util import shuffle_from_dict, escape, get_random_objects
+from utils.util import shuffle_from_dict, escape, get_random_cards
 
 
 def exercise_view(request, deck_id):
@@ -66,7 +66,7 @@ def render_multiple_meaning_exercise(request, deck_id, order):
 
     choices = {word_object.id: word_object.word}
 
-    [choices.update({word.id: word.word}) for word in get_random_objects(deck.cards, not_equal=word_object.id, quantity=3)]
+    [choices.update({card.word.id: card.word.word}) for card in get_random_cards(deck.cards, not_equal=word_object.id, quantity=3)]
 
     choices = shuffle_from_dict(choices)
 
@@ -98,7 +98,7 @@ def render_multiple_example(request, deck_id, order):
 
     choices = {word_object.id: word_object.word}
 
-    [choices.update({word.id: word.word}) for word in get_random_objects(deck.cards, not_equal=word_object.id, quantity=3)]
+    [choices.update({card.word.id: card.word.word}) for card in get_random_cards(deck.cards, not_equal=word_object.id, quantity=3)]
 
     choices = shuffle_from_dict(choices)
 
