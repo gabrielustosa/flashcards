@@ -52,7 +52,7 @@ python manage.py migrate
 
 ### Observação
 
-Você precisa de uma chave para API de traduções da microst, saiba mais aqui https://docs.microsoft.com/pt-br/azure/cognitive-services/Translator/translator-text-apis?tabs=python#translate-text
+Você precisa de uma chave para API de traduções da microst, saiba mais [aqui](https://docs.microsoft.com/pt-br/azure/cognitive-services/Translator/translator-text-apis?tabs=python#translate-text)
 
 
 ## Contato
